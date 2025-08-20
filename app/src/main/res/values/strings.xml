@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Arcent</string>
+    <!-- Retained title -->
+    <string name="title_celebrate">Celebrate Every Win ✦</string>
+    <!-- New primary action text -->
+    <string name="action_sign_with_google">Sign With Google</string>
+    <!-- New local provider text -->
+    <string name="provider_sqlite_local">Locally with SQLite</string>
+    <!-- Terms (retained) -->
+    <string name="terms_prefix">By continuing you agree to our apps </string>
+    <string name="terms_service">Terms of Services</string>
+    <string name="privacy_policy">Privacy Policy</string>
+</resources>
