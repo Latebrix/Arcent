@@ -4,6 +4,7 @@ import android.content.Context
 import io.appwrite.Client
 import io.appwrite.services.Account
 import io.appwrite.services.Functions
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeout
 import org.json.JSONObject
 import tech.arcent.BuildConfig
@@ -43,6 +44,28 @@ class AppwriteAuthRepository : AuthRepository {
             val sessionId = sessionObj.optString("id").takeIf { it.isNotBlank() } ?: ""
             SessionManager.save(context, sessionId, sessionSecret)
         }
+    }
+
+    override suspend fun fetchAndCacheProfile(context: Context) {
+        val maxAttempts = 6
+        var attempt = 0
+        while (attempt < maxAttempts) {
+            attempt++
+            val (_, storedSecret) = SessionManager.load(context) ?: return
+            if (storedSecret.isNullOrBlank()) return
+            val c = client(context)
+            applySessionSecret(c, storedSecret)
+            val success = runCatching { Account(c).get() }.onSuccess { acc ->
+                val name = acc.name?.takeIf { it.isNotBlank() }
+                UserProfileStore.saveProfile(context, name = name, avatarUrl = null, provider = "google")
+            }.isSuccess
+            if (success) return else {
+                val delayMs = (500L shl (attempt - 1)).coerceAtMost(8000L)
+                delay(delayMs)
+            }
+        }
+        // final fallback to mark fetched so we don't hammer function repeatedly
+        UserProfileStore.saveProfile(context, name = null, avatarUrl = null, provider = "google")
     }
 
     /*

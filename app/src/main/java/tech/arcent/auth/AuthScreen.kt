@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -17,7 +18,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,6 +43,7 @@ fun AuthScreen(onAuthenticated: () -> Unit = {}, vm: AuthViewModel = viewModel()
     val state by vm.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
+    LaunchedEffect(Unit) { vm.onEvent(AuthEvent.CheckSession, context) }
 
     if (state.isAuthenticated) {
         // Notify parent and exit
@@ -110,15 +116,34 @@ fun AuthScreen(onAuthenticated: () -> Unit = {}, vm: AuthViewModel = viewModel()
                         text = stringResource(R.string.title_celebrate),
                         style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold, fontSize = 24.sp, lineHeight = 24.sp),
                         modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
-                    LandingSection(
-                        onGoogle = { launchGoogle() },
-                        onLocal = { vm.onEvent(AuthEvent.LocalRequested) }
-                    )
+                    if (!state.localMode) {
+                        LandingSection(
+                            onGoogle = { launchGoogle() },
+                            onLocal = { vm.onEvent(AuthEvent.LocalRequested) }
+                        )
+                    } else {
+                        LocalNameSection(
+                            name = state.localName,
+                            error = state.localNameError,
+                            onNameChange = { vm.onEvent(AuthEvent.LocalNameChanged(it)) },
+                            onSubmit = { vm.onEvent(AuthEvent.LocalSubmit, context) }
+                        )
+                    }
                     state.error?.let { err ->
                         Spacer(Modifier.height(12.dp))
                         Text(err, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
+                    }
+                    Spacer(Modifier.height(24.dp))
+                    if (state.localMode) {
+                        Text(
+                            text = stringResource(id = R.string.local_mode_info),
+                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, lineHeight = 16.sp, textAlign = TextAlign.Center, color = Color(0xFFB0B0B0)),
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                 }
             }
@@ -139,3 +164,39 @@ fun AuthScreen(onAuthenticated: () -> Unit = {}, vm: AuthViewModel = viewModel()
 @Preview(name = "Auth Simple", widthDp = 360, heightDp = 640)
 @Composable
 private fun PreviewAuthSimple() { AppTheme { AuthScreen() } }
+
+@Composable
+private fun LocalNameSection(
+    name: String,
+    error: String?,
+    onNameChange: (String) -> Unit,
+    onSubmit: () -> Unit
+) {
+    OutlinedTextField(
+        value = name,
+        onValueChange = onNameChange,
+        label = { Text(stringResource(id = R.string.label_your_name)) },
+        placeholder = { Text(stringResource(id = R.string.placeholder_enter_your_name)) },
+        singleLine = true,
+        isError = error != null,
+        keyboardOptions = KeyboardOptions(
+            capitalization = KeyboardCapitalization.Words,
+            imeAction = ImeAction.Done
+        ),
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp)
+    )
+    if (error != null) {
+        Spacer(Modifier.height(4.dp))
+        Text(error, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
+    }
+    Spacer(Modifier.height(20.dp))
+    Button(
+        onClick = onSubmit,
+        modifier = Modifier.fillMaxWidth().height(52.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF789C93))
+    ) {
+        Text(stringResource(id = R.string.button_continue), fontSize = 16.sp, color = Color.White)
+    }
+}

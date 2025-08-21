@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    id("org.jetbrains.kotlin.kapt")
 }
 
 android {
@@ -36,20 +37,19 @@ android {
         jvmTarget = "11"
     }
     buildFeatures {
-        buildConfig = true // enable BuildConfig generation
+        buildConfig = true
     }
 }
 
 secrets {
-    // Point to dedicated secrets files (do NOT commit real secrets)
-    propertiesFileName = "secrets.properties"              // actual secrets (ignored by VCS)
-    defaultPropertiesFileName = "secrets.properties.example" // fallback/sample values
+    // point to dedicated secrets files
+    propertiesFileName = "secrets.properties"
+    defaultPropertiesFileName = "secrets.properties.example"
 
-    // Ignore Android SDK path & any sdk.* entries in local.properties
     ignoreList.add("sdk.*")
 }
 
-// Exclude problematic BOM globally (AGP 8.11 strict variant matching rejects platform as library)
+// exclude BOM globally
 configurations.configureEach {
     exclude(group = "com.squareup.okhttp3", module = "okhttp-bom")
 }
@@ -86,13 +86,16 @@ dependencies {
     implementation("io.appwrite:sdk-for-android:4.0.1") {
         exclude(group = "com.squareup.okhttp3", module = "okhttp-bom")
     }
-    // Provide explicit OkHttp libs (avoid BOM variant issue)
+
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation("com.google.android.gms:play-services-auth:21.2.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
     implementation("io.coil-kt:coil-compose:2.6.0")
     implementation("androidx.core:core-splashscreen:1.0.1")
-    // Added for encrypted shared preferences
+
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1")
 }

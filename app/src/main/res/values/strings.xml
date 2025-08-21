@@ -4,10 +4,30 @@
     <string name="title_celebrate">Celebrate Every Win ✦</string>
     <!-- New primary action text -->
     <string name="action_sign_with_google">Sign With Google</string>
-    <!-- New local provider text -->
-    <string name="provider_sqlite_local">Locally with SQLite</string>
-    <!-- Terms (retained) -->
+    <!-- Local provider text updated to Room -->
+    <string name="provider_sqlite_local">Locally with Room</string>
+    <!-- Terms -->
     <string name="terms_prefix">By continuing you agree to our apps </string>
     <string name="terms_service">Terms of Services</string>
     <string name="privacy_policy">Privacy Policy</string>
+    <!-- Home Screen -->
+    <string name="home_recent_achievements">Recent Achievements</string>
+    <string name="home_action_add_new_achievement">Add New Achievement</string>
+    <string name="home_first_win_title">Celebrate your first win</string>
+    <string name="home_first_win_subtitle">Add an achievement to start building your momentum.</string>
+    <string name="nav_wins">Wins</string>
+    <string name="nav_stats">Stats</string>
+    <!-- Content descriptions -->
+    <string name="cd_search">Search</string>
+    <string name="cd_settings">Settings</string>
+    <string name="cd_featured_win">Featured Win Image</string>
+    <string name="cd_add">Add</string>
+    <string name="cd_details">Details</string>
+    <!-- Local mode info (Auth screen when using Room/local) -->
+    <string name="local_mode_info">You host on your own; no one can access your data + no privacy terms to accept :)</string>
+    <!-- New strings for name input -->
+    <string name="label_your_name">Your name</string>
+    <string name="placeholder_enter_your_name">Enter your name</string>
+    <!-- Continue button -->
+    <string name="button_continue">Continue</string>
 </resources>

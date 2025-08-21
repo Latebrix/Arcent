@@ -3,29 +3,33 @@ package tech.arcent.auth
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import tech.arcent.auth.data.AuthRepository
 import tech.arcent.auth.data.AppwriteAuthRepository
+import tech.arcent.auth.data.LocalUserStore
+import tech.arcent.auth.data.UserProfileStore
 
 /*
- * ViewModel for managing authentication state and events.
+ * Model for managing authentication
  */
 
 data class AuthUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val isAuthenticated: Boolean = false,
-    val isChecking: Boolean = true
+    val isChecking: Boolean = true,
+    val localMode: Boolean = false,
+    val localName: String = "",
+    val localNameError: String? = null
 )
 
 sealed class AuthEvent {
     data class GoogleToken(val idToken: String): AuthEvent()
     data class GoogleFailed(val statusCode: Int, val msg: String?): AuthEvent()
     object LocalRequested: AuthEvent()
+    data class LocalNameChanged(val value: String): AuthEvent()
+    object LocalSubmit: AuthEvent()
     object CheckSession: AuthEvent()
 }
 
@@ -39,8 +43,24 @@ class AuthViewModel: ViewModel() {
         when(e) {
             is AuthEvent.GoogleToken -> googleLogin(e.idToken, context)
             is AuthEvent.GoogleFailed -> _uiState.update { it.copy(error = "google_${e.statusCode}:${e.msg}", isLoading = false) }
-            AuthEvent.LocalRequested -> _uiState.update { it.copy(isAuthenticated = true, error = null) }
+            AuthEvent.LocalRequested -> _uiState.update { it.copy(localMode = true, error = null) }
+            is AuthEvent.LocalNameChanged -> _uiState.update { it.copy(localName = e.value, localNameError = null) }
+            AuthEvent.LocalSubmit -> submitLocal(context)
             AuthEvent.CheckSession -> checkSession(context)
+        }
+    }
+
+    private fun submitLocal(context: Context?) {
+        if (context == null) return
+        val name = _uiState.value.localName.trim()
+        if (name.length < 2) {
+            _uiState.update { it.copy(localNameError = "Name too short") }
+            return
+        }
+        viewModelScope.launch {
+            runCatching { LocalUserStore.saveLocalUserName(context, name) }
+                .onSuccess { _uiState.update { it.copy(isAuthenticated = true, isLoading = false) } }
+                .onFailure { ex -> _uiState.update { it.copy(localNameError = ex.message ?: "Failed to save") } }
         }
     }
 
@@ -49,7 +69,11 @@ class AuthViewModel: ViewModel() {
         viewModelScope.launch {
             loading()
             runCatching { repo.loginWithGoogle(context, idToken) }
-                .onSuccess { _uiState.update { it.copy(isLoading = false, isAuthenticated = true, error = null, isChecking = false) } }
+                .onSuccess {
+                    // fetch profile one time
+                    runCatching { repo.fetchAndCacheProfile(context) }
+                    _uiState.update { it.copy(isLoading = false, isAuthenticated = true, error = null, isChecking = false) }
+                }
                 .onFailure { ex -> _uiState.update { it.copy(isLoading = false, error = ex.message, isChecking = false) } }
         }
     }
@@ -68,9 +92,13 @@ class AuthViewModel: ViewModel() {
             return
         }
         viewModelScope.launch {
-            runCatching { repo.hasActiveSession(context) }
-                .onSuccess { has -> _uiState.update { it.copy(isAuthenticated = if (has) true else it.isAuthenticated, isChecking = false) } }
-                .onFailure { _uiState.update { it.copy(isChecking = false) } }
+            // First: remote google session check
+            val remoteHas = runCatching { repo.hasActiveSession(context) }.getOrElse { false }
+            if (remoteHas) runCatching { repo.fetchAndCacheProfile(context) }
+            // Then: local profile check (provider == local)
+            val localProfile = UserProfileStore.load(context)
+            val localHas = (localProfile?.provider == "local" && !localProfile.name.isNullOrBlank())
+            _uiState.update { it.copy(isAuthenticated = remoteHas || localHas || it.isAuthenticated, isChecking = false) }
         }
     }
 }
