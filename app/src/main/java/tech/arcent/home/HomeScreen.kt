@@ -12,12 +12,22 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import tech.arcent.stats.StatsScreen
+import tech.arcent.addachievement.AddAchievementScreen
+import tech.arcent.addachievement.AddAchievementViewModel
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.with
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun HomeScreen(vm: HomeViewModel = viewModel()) {
     val state by vm.uiState.collectAsState()
@@ -27,17 +37,38 @@ fun HomeScreen(vm: HomeViewModel = viewModel()) {
         systemUi.setNavigationBarColor(Color(0xFF2C2C2E), darkIcons = false)
     }
     var selectedTab by remember { mutableStateOf(0) }
-    HomeScaffold(selectedTab = selectedTab, onTabChange = { selectedTab = it }) {
-        if (selectedTab == 0) WinsContent(state) else StatsScreen()
+    var isAdding by remember { mutableStateOf(false) }
+    val addVm: AddAchievementViewModel = viewModel()
+
+    HomeScaffold(selectedTab = selectedTab, onTabChange = { selectedTab = it }, showBottomBar = !isAdding) {
+        AnimatedContent(targetState = isAdding, transitionSpec = {
+            if (targetState) {
+                slideInHorizontally { it } + fadeIn() togetherWith slideOutHorizontally { -it / 2 } + fadeOut()
+            } else {
+                slideInHorizontally { -it / 2 } + fadeIn() togetherWith slideOutHorizontally { it } + fadeOut()
+            }
+        }, label = "add_transition") { adding ->
+            if (adding) {
+                AddAchievementScreen(
+                    vm = addVm,
+                    onBack = { isAdding = false },
+                    onSaved = { vm.addAchievement(it) }
+                )
+            } else {
+                if (selectedTab == 0) WinsContent(state, onAddNew = { isAdding = true }) else StatsScreen()
+            }
+        }
     }
 }
 
 @Composable
-private fun HomeScaffold(selectedTab: Int, onTabChange: (Int) -> Unit, content: @Composable () -> Unit) {
+private fun HomeScaffold(selectedTab: Int, onTabChange: (Int) -> Unit, showBottomBar: Boolean, content: @Composable () -> Unit) {
     Scaffold(
         containerColor = Color(0xFF1C1C1E),
         bottomBar = {
-            AppBottomNavigation(selectedIndex = selectedTab, onSelect = onTabChange)
+            if (showBottomBar) {
+                AppBottomNavigation(selectedIndex = selectedTab, onSelect = onTabChange)
+            }
         }
     ) { pv ->
         Box(Modifier.padding(pv)) { content() }
@@ -47,5 +78,5 @@ private fun HomeScaffold(selectedTab: Int, onTabChange: (Int) -> Unit, content: 
 @Preview(showBackground = true)
 @Composable
 private fun HomeScreenPreview() {
-    WinsContent(HomeUiState(achievements = sampleAchievements(), streakDays = 7))
+    WinsContent(HomeUiState(achievements = sampleAchievements(), streakDays = 7), onAddNew = {})
 }

@@ -30,4 +30,71 @@
     <string name="placeholder_enter_your_name">Enter your name</string>
     <!-- Continue button -->
     <string name="button_continue">Continue</string>
+    <!-- Add Achievement Screen -->
+    <string name="add_title_screen">New Achievement</string>
+    <string name="add_back">Back</string>
+    <string name="add_tips">Tips</string>
+    <string name="add_field_title_label">Title</string>
+    <string name="add_field_title_placeholder">e.g., Completed 5K Run</string>
+    <string name="add_field_details_label">Details (optional)</string>
+    <string name="add_field_details_placeholder">How did you achieve this? Any notes you would like to remember.</string>
+    <string name="add_category">Category</string>
+    <string name="add_tags">Tags</string>
+    <string name="add_date">Date</string>
+    <string name="add_time">Time</string>
+    <string name="add_add_photo_optional">Add a Photo (optional)</string>
+    <string name="add_add_image">Add image</string>
+    <string name="add_save">Save Achievement</string>
+    <string name="cd_back">Back</string>
+    <string name="cd_add_image">Add image</string>
+    <!-- Categories -->
+    <string name="cat_health">Health</string>
+    <string name="cat_learning">Learning</string>
+    <string name="cat_productivity">Productivity</string>
+    <string name="cat_wellness">Wellness</string>
+    <string name="cat_personal">Personal</string>
+    <!-- Tags -->
+    <string name="tag_milestone">Milestone</string>
+    <string name="tag_habit">Habit</string>
+    <string name="tag_pr">PR</string>
+    <string name="tag_fitness">Fitness</string>
+    <string name="tag_mindset">Mindset</string>
+    <string name="tag_career">Career</string>
+    <!-- Tips Sheet -->
+    <string name="tips_title">Achievement Tips</string>
+    <string name="tip_1">Be specific about what you accomplished.</string>
+    <string name="tip_2">Add context: why does this matter?</string>
+    <string name="tip_3">Tag achievements to track patterns.</string>
+    <string name="tip_4">Small consistent wins build momentum.</string>
+    <string name="tip_5">Add a photo when it helps you remember.</string>
+    <string name="add_ok">OK</string>
+    <string name="add_cancel">Cancel</string>
+    <string name="add_hour_label">Hour</string>
+    <string name="add_min_label">Min</string>
+    <string name="add_add_mine">Add Mine!</string>
+    <string name="add_category_add">Add Category</string>
+    <string name="add_tag_add">Add Tag</string>
+    <string name="add_new_category_dialog_title">New Category</string>
+    <string name="add_new_tag_dialog_title">New Tag</string>
+    <string name="add_input_hint_category">Category name</string>
+    <string name="add_input_hint_tag">Tag name</string>
+    <string name="add_error_too_long">Too long</string>
+    <string name="add_markdown_bold">B</string>
+    <string name="add_markdown_italic">Italic</string>
+    <string name="add_markdown_bullet">• List</string>
+    <string name="add_markdown_numbered">1. List</string>
+    <string name="add_markdown_preview">Preview</string>
+    <!-- Markdown improved labels -->
+    <string name="add_markdown_heading1">H1</string>
+    <string name="add_markdown_heading2">H2</string>
+    <string name="add_markdown_quote">Quote</string>
+    <string name="add_markdown_bullet_label">Bullet</string>
+    <string name="add_markdown_numbered_label">Numbered</string>
+    <string name="add_clear">Clear</string>
+    <string name="cd_clear">Clear Content</string>
+    <string name="add_plus">+</string>
+    <string name="add_copy">Copy</string>
+    <string name="add_paste">Paste</string>
+    <string name="add_cut">Cut</string>
+    <string name="add_select_all">Select All</string>
 </resources>

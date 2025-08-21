@@ -37,39 +37,45 @@ import androidx.compose.ui.unit.sp
 import tech.arcent.R
 import androidx.compose.ui.platform.LocalContext
 import tech.arcent.auth.data.UserProfileStore
+import androidx.compose.foundation.LocalOverscrollConfiguration
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.foundation.ExperimentalFoundationApi
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-internal fun WinsContent(state: HomeUiState) {
+internal fun WinsContent(state: HomeUiState, onAddNew: () -> Unit) {
     val listState = rememberLazyListState()
     Column(Modifier.fillMaxSize()) {
         TopBar(modifier = Modifier.padding(horizontal = 16.dp))
-        // scrollable
-        LazyColumn(
-            state = listState,
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp)
-        ) {
-            item { Spacer(Modifier.height(4.dp)) }
-            item { RecentWinCard(modifier = Modifier.fillMaxWidth()) }
-            item { Spacer(Modifier.height(16.dp)) }
-            item { AddNewAchievementButton(modifier = Modifier.fillMaxWidth()) }
-            item { Spacer(Modifier.height(16.dp)) }
-            item { FirstWinPrompt(modifier = Modifier.fillMaxWidth()) }
-            item { Spacer(Modifier.height(24.dp)) }
-            item {
-                Text(
-                    text = stringResource(id = R.string.home_recent_achievements),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
+        CompositionLocalProvider(LocalOverscrollConfiguration provides null) {
+            // scrollable
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp)
+            ) {
+                item { Spacer(Modifier.height(4.dp)) }
+                item { RecentWinCard(modifier = Modifier.fillMaxWidth()) }
+                item { Spacer(Modifier.height(16.dp)) }
+                item { AddNewAchievementButton(modifier = Modifier.fillMaxWidth(), onClick = onAddNew) }
+                item { Spacer(Modifier.height(16.dp)) }
+                item { FirstWinPrompt(modifier = Modifier.fillMaxWidth()) }
+                item { Spacer(Modifier.height(24.dp)) }
+                item {
+                    Text(
+                        text = stringResource(id = R.string.home_recent_achievements),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+                item { Spacer(Modifier.height(16.dp)) }
+                items(state.achievements, key = { it.title }) { achievement ->
+                    AchievementItem(achievement, modifier = Modifier.fillMaxWidth())
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+                item { Spacer(Modifier.height(32.dp)) }
             }
-            item { Spacer(Modifier.height(16.dp)) }
-            items(state.achievements, key = { it.title }) { achievement ->
-                AchievementItem(achievement, modifier = Modifier.fillMaxWidth())
-                Spacer(modifier = Modifier.height(12.dp))
-            }
-            item { Spacer(Modifier.height(32.dp)) }
         }
     }
 }
@@ -147,9 +153,9 @@ internal fun RecentWinCard(modifier: Modifier = Modifier) {
 }
 
 @Composable
-internal fun AddNewAchievementButton(modifier: Modifier = Modifier) {
+internal fun AddNewAchievementButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
     Button(
-        onClick = { /* add new */ },
+        onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
             .height(50.dp),
