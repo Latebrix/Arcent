@@ -2,7 +2,6 @@ package tech.arcent.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -11,23 +10,16 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -35,20 +27,28 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import tech.arcent.R
-import androidx.compose.ui.platform.LocalContext
 import tech.arcent.auth.data.UserProfileStore
-import androidx.compose.foundation.LocalOverscrollConfiguration
+import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.foundation.ExperimentalFoundationApi
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-internal fun WinsContent(state: HomeUiState, onAddNew: () -> Unit) {
+internal fun WinsContent(
+    state: HomeUiState,
+    onAddNew: () -> Unit,
+    onToggleAll: () -> Unit,
+    onLoadMore: () -> Unit,
+    onOpenSearch: () -> Unit,
+    onSearchQueryChange: (String) -> Unit
+) {
     val listState = rememberLazyListState()
     Column(Modifier.fillMaxSize()) {
-        TopBar(modifier = Modifier.padding(horizontal = 16.dp))
-        CompositionLocalProvider(LocalOverscrollConfiguration provides null) {
-            // scrollable
+        TopBar(modifier = Modifier.padding(horizontal = 16.dp), onOpenSearch = onOpenSearch)
+        CompositionLocalProvider(LocalOverscrollFactory provides null) {
             LazyColumn(
                 state = listState,
                 modifier = Modifier.fillMaxSize(),
@@ -62,17 +62,34 @@ internal fun WinsContent(state: HomeUiState, onAddNew: () -> Unit) {
                 item { FirstWinPrompt(modifier = Modifier.fillMaxWidth()) }
                 item { Spacer(Modifier.height(24.dp)) }
                 item {
-                    Text(
-                        text = stringResource(id = R.string.home_recent_achievements),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = stringResource(id = R.string.home_recent_achievements),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Surface(onClick = onToggleAll, shape = CircleShape, color = Color(0xFF2C2C2E)) {
+                            Row(Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Text(stringResource(id = R.string.home_all), color = Color.White, fontSize = 14.sp)
+                                Icon(Icons.Default.ChevronRight, contentDescription = stringResource(id = R.string.cd_all), tint = Color.White, modifier = Modifier.size(16.dp))
+                            }
+                        }
+                    }
                 }
                 item { Spacer(Modifier.height(16.dp)) }
-                items(state.achievements, key = { it.title }) { achievement ->
-                    AchievementItem(achievement, modifier = Modifier.fillMaxWidth())
-                    Spacer(modifier = Modifier.height(12.dp))
+                if (state.achievements.isEmpty()) {
+                    item {
+                        Box(Modifier.fillMaxWidth().padding(vertical = 48.dp), contentAlignment = Alignment.Center) {
+                            Text(text = stringResource(id = R.string.home_empty_recent), color = Color(0xFFAAAAAA), fontSize = 14.sp)
+                        }
+                    }
+                } else {
+                    items(state.achievements, key = { it.id }) { achievement ->
+                        AchievementItem(achievement, modifier = Modifier.fillMaxWidth())
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
                 }
                 item { Spacer(Modifier.height(32.dp)) }
             }
@@ -81,7 +98,14 @@ internal fun WinsContent(state: HomeUiState, onAddNew: () -> Unit) {
 }
 
 @Composable
-internal fun TopBar(modifier: Modifier = Modifier) {
+private fun DateHeaderRow(dayStart: Long) {
+    val fmt = remember { SimpleDateFormat("d MMM yyyy", Locale.getDefault()) }
+    val text = fmt.format(Date(dayStart))
+    Text(text = text, color = Color(0xFFBBBBBB), fontWeight = FontWeight.SemiBold, modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp))
+}
+
+@Composable
+internal fun TopBar(modifier: Modifier = Modifier, onOpenSearch: () -> Unit) {
     val context = LocalContext.current
     val profile = remember { UserProfileStore.load(context) }
     val nameInitial = profile?.name?.firstOrNull()?.uppercaseChar()?.toString() ?: "U"
@@ -92,7 +116,6 @@ internal fun TopBar(modifier: Modifier = Modifier) {
         ,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // avatar
         Surface(
             shape = CircleShape,
             color = Color(0xFF1E88E5),
@@ -109,7 +132,7 @@ internal fun TopBar(modifier: Modifier = Modifier) {
         }
         Spacer(modifier = Modifier.weight(1f))
         val actionBg = Color(0xFF2C2C2E)
-        IconButton(onClick = { /* search */ }) {
+        IconButton(onClick = { onOpenSearch() }) {
             Surface(color = actionBg, shape = CircleShape) {
                 Icon(
                     painter = painterResource(id = R.drawable.icons_search),
@@ -119,7 +142,7 @@ internal fun TopBar(modifier: Modifier = Modifier) {
                 )
             }
         }
-        IconButton(onClick = { /* settings */ }) {
+        IconButton(onClick = { }) {
             Surface(color = actionBg, shape = CircleShape) {
                 Icon(
                     painter = painterResource(id = R.drawable.icons_settings),
@@ -193,61 +216,6 @@ internal fun FirstWinPrompt(modifier: Modifier = Modifier) {
                 Text(stringResource(id = R.string.home_first_win_subtitle), color = Color.Gray, style = MaterialTheme.typography.bodyMedium)
             }
         }
-    }
-}
-
-@Composable
-internal fun AchievementItem(achievement: Achievement, modifier: Modifier = Modifier) {
-    Surface(
-        color = Color(0xFF2C2C2E),
-        shape = RoundedCornerShape(16.dp),
-        onClick = {},
-        modifier = modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Image(
-                painter = painterResource(id = achievement.imageRes),
-                contentDescription = achievement.title,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(RoundedCornerShape(12.dp))
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(achievement.title, color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(achievement.timestamp, color = Color.Gray, style = MaterialTheme.typography.bodySmall)
-                Spacer(modifier = Modifier.height(8.dp))
-                Row {
-                    achievement.tags.forEach { tag ->
-                        AchievementTag(tag)
-                        Spacer(modifier = Modifier.width(8.dp))
-                    }
-                }
-            }
-            Icon(Icons.Default.ChevronRight, contentDescription = stringResource(id = R.string.cd_details), tint = Color.Gray)
-        }
-    }
-}
-
-@Composable
-internal fun AchievementTag(text: String) {
-    Surface(
-        color = Color(0xFF3A3A3C),
-        shape = RoundedCornerShape(8.dp)
-    ) {
-        Text(
-            text = text,
-            color = Color.White,
-            style = MaterialTheme.typography.labelMedium,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-        )
     }
 }
 

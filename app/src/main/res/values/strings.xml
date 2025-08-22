@@ -97,4 +97,17 @@
     <string name="add_paste">Paste</string>
     <string name="add_cut">Cut</string>
     <string name="add_select_all">Select All</string>
+    <string name="home_all">All</string>
+    <string name="cd_all">All achievements</string>
+    <string name="home_load_more">Load More</string>
+    <string name="search_title">Search Achievements</string>
+    <string name="search_close">Close</string>
+    <string name="search_placeholder">Type to search...</string>
+    <string name="search_no_results">No results</string>
+    <string name="add_saving">Saving...</string>
+    <string name="home_empty_recent">No achievements yet. Add your first win!</string>
+    <string name="all_empty">No achievements to show.</string>
+    <string name="search_title_bar">Search</string>
+    <string name="search_hint_inline">Search your achievements...</string>
+    <string name="stats_placeholder">Stats coming soon</string>
 </resources>

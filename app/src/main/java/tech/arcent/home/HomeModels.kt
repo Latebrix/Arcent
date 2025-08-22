@@ -1,22 +1,27 @@
 package tech.arcent.home
 
-import androidx.annotation.DrawableRes
-
+/* UI model mapped from domain */
 data class Achievement(
+    val id: String,
     val title: String,
-    val timestamp: String,
+    val achievedAt: Long,
     val tags: List<String>,
-    @DrawableRes val imageRes: Int
+    val photoUrl: String?
 )
+
+sealed interface AllListItem { data class DateHeader(val dayStartMillis: Long): AllListItem; data class Entry(val achievement: Achievement): AllListItem }
 
 data class HomeUiState(
     val achievements: List<Achievement> = emptyList(),
+    val allAchievements: List<Achievement> = emptyList(),
+    val allListItems: List<AllListItem> = emptyList(),
+    val nextCursor: String? = null,
+    val loadingMore: Boolean = false,
+    val showingAll: Boolean = false,
     val totalWins: Int = achievements.size,
-    val streakDays: Int = 7
-)
-
-internal fun sampleAchievements(): List<Achievement> = listOf(
-    Achievement("Cooked a Healthy Meal", "Yesterday • 7:30 PM", listOf("Wellness", "Habit"), tech.arcent.R.drawable.ic_splash),
-    Achievement("Studied 30 Minutes", "Tue • 8:00 PM", listOf("Learning", "Consistency"), tech.arcent.R.drawable.ic_splash),
-    Achievement("Decluttered Workspace", "Mon • 6:15 PM", listOf("Productivity", "Home"), tech.arcent.R.drawable.ic_splash)
+    val streakDays: Int = 0,
+    val searching: Boolean = false,
+    val searchQuery: String = "",
+    val searchResults: List<Achievement> = emptyList(),
+    val searchLoading: Boolean = false
 )

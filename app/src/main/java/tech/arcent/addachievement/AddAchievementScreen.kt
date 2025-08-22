@@ -71,7 +71,7 @@ fun AddAchievementScreen(
                 Modifier
                     .fillMaxWidth()
                     .background(darkBackground)
-                    .padding(start = 2.dp, end = 6.dp, top = 12.dp, bottom = 2.dp), /* increased top & bottom padding */
+                    .padding(start = 2.dp, end = 6.dp, top = 12.dp, bottom = 2.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Surface(shape = CircleShape, color = Color.Transparent, modifier = Modifier.size(40.dp)) { /* enlarged touch target */
@@ -216,6 +216,18 @@ fun AddAchievementScreen(
     if (state.showTipsSheet) { AddAchievementTipsSheet(onDismiss = { vm.onEvent(AddAchievementEvent.ToggleTips) }) }
     if (state.showAddCategoryDialog) { AddTextItemDialog(stringResource(id = R.string.add_new_category_dialog_title), stringResource(id = R.string.add_input_hint_category), { vm.onEvent(AddAchievementEvent.AddCategory(it)) }) { vm.onEvent(AddAchievementEvent.ToggleAddCategoryDialog) } }
     if (state.showAddTagDialog) { AddTextItemDialog(stringResource(id = R.string.add_new_tag_dialog_title), stringResource(id = R.string.add_input_hint_tag), { vm.onEvent(AddAchievementEvent.AddTag(it)) }) { vm.onEvent(AddAchievementEvent.ToggleAddTagDialog) } }
+    /* saving overlay */
+    if (state.isSaving) {
+        Box(Modifier.fillMaxSize().background(Color(0x99000000)), contentAlignment = Alignment.Center) {
+            Surface(shape = RoundedCornerShape(16.dp), color = Color(0xFF1E1E1F), tonalElevation = 8.dp, shadowElevation = 8.dp) {
+                Row(Modifier.padding(horizontal = 28.dp, vertical = 22.dp), verticalAlignment = Alignment.CenterVertically) {
+                    CircularProgressIndicator(color = Color(0xFF799C92), strokeWidth = 3.dp, modifier = Modifier.size(32.dp))
+                    Spacer(Modifier.width(16.dp))
+                    Text(stringResource(id = R.string.add_saving), color = Color.White, fontSize = 16.sp)
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -336,7 +348,7 @@ private fun AddTextItemDialog(title: String, hint: String, onAdd: (String) -> Un
     )
 }
 
-/* Date/time formatting helpers  */
+/* date time formatting helpers  */
 private fun formatDate(millis: Long): String {
     val df = DateFormat.getDateInstance(DateFormat.MEDIUM)
     val cal = Calendar.getInstance().apply { timeInMillis = millis }
@@ -352,7 +364,7 @@ private fun formatTime(hour: Int, minute: Int): String {
     return tf.format(cal.time)
 }
 
-/* date/time selection block */
+/* date time selection block */
 @Composable
 private fun DateTimeBlock(label: String, value: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Column(

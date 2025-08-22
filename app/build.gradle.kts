@@ -33,29 +33,19 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
-    buildFeatures {
-        buildConfig = true
-    }
+    kotlinOptions { jvmTarget = "11" }
+    buildFeatures { buildConfig = true }
 }
 
 secrets {
-    // point to dedicated secrets files
     propertiesFileName = "secrets.properties"
     defaultPropertiesFileName = "secrets.properties.example"
-
     ignoreList.add("sdk.*")
 }
 
-// exclude BOM globally
-configurations.configureEach {
-    exclude(group = "com.squareup.okhttp3", module = "okhttp-bom")
-}
+configurations.configureEach { exclude(group = "com.squareup.okhttp3", module = "okhttp-bom") }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -84,17 +74,13 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.3")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.3")
     implementation("androidx.compose.material:material-icons-extended")
-    implementation("io.appwrite:sdk-for-android:4.0.1") {
-        exclude(group = "com.squareup.okhttp3", module = "okhttp-bom")
-    }
-
+    implementation("io.appwrite:sdk-for-android:4.0.1") { exclude(group = "com.squareup.okhttp3", module = "okhttp-bom") }
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation("com.google.android.gms:play-services-auth:21.2.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
     implementation("io.coil-kt:coil-compose:2.6.0")
     implementation("androidx.core:core-splashscreen:1.0.1")
-
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")

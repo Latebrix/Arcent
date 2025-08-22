@@ -1,5 +1,6 @@
 package tech.arcent.home
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -8,7 +9,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.ui.tooling.preview.Preview
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,36 +26,83 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import tech.arcent.home.simple.SimpleAllScreen
+import tech.arcent.home.simple.SimpleSearchScreen
+
+private enum class HomeMode { MAIN, ADD, ALL, SEARCH }
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun HomeScreen(vm: HomeViewModel = viewModel()) {
     val state by vm.uiState.collectAsState()
     val systemUi = rememberSystemUiController()
-    LaunchedEffect(Unit) {
-        systemUi.setStatusBarColor(Color(0xFF1C1C1E), darkIcons = false)
-        systemUi.setNavigationBarColor(Color(0xFF2C2C2E), darkIcons = false)
-    }
+    var mode by remember { mutableStateOf(HomeMode.MAIN) }
     var selectedTab by remember { mutableStateOf(0) }
-    var isAdding by remember { mutableStateOf(false) }
     val addVm: AddAchievementViewModel = viewModel()
 
-    HomeScaffold(selectedTab = selectedTab, onTabChange = { selectedTab = it }, showBottomBar = !isAdding) {
-        AnimatedContent(targetState = isAdding, transitionSpec = {
-            if (targetState) {
-                slideInHorizontally { it } + fadeIn() togetherWith slideOutHorizontally { -it / 2 } + fadeOut()
-            } else {
-                slideInHorizontally { -it / 2 } + fadeIn() togetherWith slideOutHorizontally { it } + fadeOut()
+    LaunchedEffect(mode, selectedTab) {
+        // sys navigation bar color match background on ALL////SEARCH screens
+        val navColor = if (mode == HomeMode.ALL || mode == HomeMode.SEARCH) Color(0xFF1C1C1E) else Color(0xFF2C2C2E)
+        systemUi.setStatusBarColor(Color(0xFF1C1C1E), false)
+        systemUi.setNavigationBarColor(navColor, false)
+    }
+
+    BackHandler(enabled = true) {
+        when {
+            selectedTab == 1 -> { selectedTab = 0 }
+            mode != HomeMode.MAIN -> { mode = HomeMode.MAIN }
+            else -> {
+                // exit app if on main screen
             }
-        }, label = "add_transition") { adding ->
-            if (adding) {
-                AddAchievementScreen(
-                    vm = addVm,
-                    onBack = { isAdding = false },
-                    onSaved = { vm.addAchievement(it) }
-                )
-            } else {
-                if (selectedTab == 0) WinsContent(state, onAddNew = { isAdding = true }) else StatsScreen()
+        }
+    }
+
+    HomeScaffold(selectedTab = selectedTab, onTabChange = { idx ->
+        selectedTab = idx
+        if (idx == 0) {
+            // return to wins if coming back from stats
+            mode = HomeMode.MAIN
+        }
+    }, showBottomBar = (selectedTab == 0 && mode == HomeMode.MAIN) || selectedTab == 1) {
+        if (selectedTab == 1) {
+            // no animation here because of the bottom nav
+            StatsScreen()
+        } else {
+            AnimatedContent(
+                targetState = mode,
+                transitionSpec = {
+                    val forward = initialState == HomeMode.MAIN && targetState != HomeMode.MAIN
+                    if (forward) {
+                        (slideInHorizontally { it } + fadeIn()) togetherWith (slideOutHorizontally { -it / 3 } + fadeOut())
+                    } else {
+                        (slideInHorizontally { -it } + fadeIn()) togetherWith (slideOutHorizontally { it / 3 } + fadeOut())
+                    }
+                }, label = "home-mode" ) { m ->
+                when (m) {
+                    HomeMode.MAIN -> WinsContent(
+                        state = state,
+                        onAddNew = { mode = HomeMode.ADD },
+                        onToggleAll = { mode = HomeMode.ALL },
+                        onLoadMore = { vm.loadMore() },
+                        onOpenSearch = { mode = HomeMode.SEARCH },
+                        onSearchQueryChange = { vm.onSearchQueryChange(it) }
+                    )
+                    HomeMode.ADD -> AddAchievementScreen(
+                        vm = addVm,
+                        onBack = { mode = HomeMode.MAIN },
+                        onSaved = { a -> vm.onNewAchievement(a); mode = HomeMode.MAIN }
+                    )
+                    HomeMode.ALL -> SimpleAllScreen(
+                        state = state,
+                        onBack = { mode = HomeMode.MAIN },
+                        onLoadMore = { vm.loadMore() }
+                    )
+                    HomeMode.SEARCH -> SimpleSearchScreen(
+                        state = state,
+                        onBack = { mode = HomeMode.MAIN },
+                        onQueryChange = { vm.onSearchQueryChange(it) }
+                    )
+                }
             }
         }
     }
@@ -73,10 +120,4 @@ private fun HomeScaffold(selectedTab: Int, onTabChange: (Int) -> Unit, showBotto
     ) { pv ->
         Box(Modifier.padding(pv)) { content() }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun HomeScreenPreview() {
-    WinsContent(HomeUiState(achievements = sampleAchievements(), streakDays = 7), onAddNew = {})
 }
