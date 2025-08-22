@@ -1,5 +1,9 @@
 package tech.arcent.auth
 
+/*
+ Authentication screen handling Google and local modes
+ */
+
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -10,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,12 +27,11 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -39,19 +43,22 @@ import tech.arcent.R
 import tech.arcent.theme.AppTheme
 
 @Composable
-fun AuthScreen(onAuthenticated: () -> Unit = {}, vm: AuthViewModel = viewModel()) {
+fun AuthScreen(
+    onAuthenticated: () -> Unit = {},
+    vm: AuthViewModel = hiltViewModel(),
+) {
     val state by vm.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     LaunchedEffect(Unit) { vm.onEvent(AuthEvent.CheckSession, context) }
 
     if (state.isAuthenticated) {
-        // Notify parent and exit
+        // Exit after notifying parent
         LaunchedEffect(Unit) { onAuthenticated() }
         return
     }
 
-    //styles system bars
+    // Style system bars
     val systemUiController = rememberSystemUiController()
     DisposableEffect(systemUiController) {
         systemUiController.setStatusBarColor(Color.Transparent, darkIcons = false)
@@ -59,78 +66,92 @@ fun AuthScreen(onAuthenticated: () -> Unit = {}, vm: AuthViewModel = viewModel()
         onDispose { }
     }
 
-    /*
-     * Google sign-in
-     */
-    val googleSignInOptions = remember {
-        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(BuildConfig.google_server_client_id)
-            .requestEmail()
-            .build()
-    }
+    // Google sign-in configuration
+    val googleSignInOptions =
+        remember {
+            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(BuildConfig.google_server_client_id)
+                .requestEmail()
+                .build()
+        }
     val googleClient = remember { GoogleSignIn.getClient(context, googleSignInOptions) }
 
-    /*
-     * Launcher for google sign intent
-     */
-    val googleLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-            runCatching { task.getResult(ApiException::class.java) }
-                .onSuccess { account ->
-                    val idToken = account.idToken
-                    if (idToken != null) vm.onEvent(AuthEvent.GoogleToken(idToken), context) else vm.onEvent(AuthEvent.GoogleFailed(-1, "null_token"))
-                }
-                .onFailure { ex ->
-                    val code = if (ex is ApiException) ex.statusCode else -2
-                    vm.onEvent(AuthEvent.GoogleFailed(code, ex.message))
-                }
-        } else {
-            vm.onEvent(AuthEvent.GoogleFailed(result.resultCode, "canceled_or_failed"))
+    // Google sign intent launcher
+    val googleLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+                runCatching { task.getResult(ApiException::class.java) }
+                    .onSuccess { account ->
+                        val idToken = account.idToken
+                        if (idToken != null) {
+                            vm.onEvent(
+                                AuthEvent.GoogleToken(idToken),
+                                context,
+                            )
+                        } else {
+                            vm.onEvent(AuthEvent.GoogleFailed(-1, "null_token"))
+                        }
+                    }
+                    .onFailure { ex ->
+                        val code = if (ex is ApiException) ex.statusCode else -2
+                        vm.onEvent(AuthEvent.GoogleFailed(code, ex.message))
+                    }
+            } else {
+                vm.onEvent(AuthEvent.GoogleFailed(result.resultCode, "canceled_or_failed"))
+            }
         }
+
+    fun launchGoogle() {
+        googleLauncher.launch(googleClient.signInIntent)
     }
-    fun launchGoogle() { googleLauncher.launch(googleClient.signInIntent) }
 
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Box(Modifier.fillMaxSize()) {
             Column(modifier = Modifier.fillMaxSize().navigationBarsPadding()) {
                 Box(
                     modifier = Modifier.fillMaxWidth().aspectRatio(487f / 718f).weight(0.6f),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     AsyncImage(
-                        model = ImageRequest.Builder(context)
-                            .data(R.drawable.office_illustrated_last)
-                            .crossfade(true)
-                            .build(),
+                        model =
+                            ImageRequest.Builder(context)
+                                .data(R.drawable.office_illustrated_last)
+                                .crossfade(true)
+                                .build(),
                         contentDescription = null,
                         modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
+                        contentScale = ContentScale.Crop,
                     )
                 }
                 Column(
                     modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 32.dp, vertical = 24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
                         text = stringResource(R.string.title_celebrate),
-                        style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold, fontSize = 24.sp, lineHeight = 24.sp),
+                        style =
+                            MaterialTheme.typography.headlineLarge.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 24.sp,
+                                lineHeight = 24.sp,
+                            ),
                         modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
                         textAlign = TextAlign.Center,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
                     )
                     if (!state.localMode) {
                         LandingSection(
                             onGoogle = { launchGoogle() },
-                            onLocal = { vm.onEvent(AuthEvent.LocalRequested) }
+                            onLocal = { vm.onEvent(AuthEvent.LocalRequested) },
                         )
                     } else {
                         LocalNameSection(
                             name = state.localName,
                             error = state.localNameError,
                             onNameChange = { vm.onEvent(AuthEvent.LocalNameChanged(it)) },
-                            onSubmit = { vm.onEvent(AuthEvent.LocalSubmit, context) }
+                            onSubmit = { vm.onEvent(AuthEvent.LocalSubmit, context) },
                         )
                     }
                     state.error?.let { err ->
@@ -141,8 +162,14 @@ fun AuthScreen(onAuthenticated: () -> Unit = {}, vm: AuthViewModel = viewModel()
                     if (state.localMode) {
                         Text(
                             text = stringResource(id = R.string.local_mode_info),
-                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, lineHeight = 16.sp, textAlign = TextAlign.Center, color = Color(0xFFB0B0B0)),
-                            modifier = Modifier.fillMaxWidth()
+                            style =
+                                MaterialTheme.typography.bodySmall.copy(
+                                    fontSize = 12.sp,
+                                    lineHeight = 16.sp,
+                                    textAlign = TextAlign.Center,
+                                    color = Color(0xFFB0B0B0),
+                                ),
+                            modifier = Modifier.fillMaxWidth(),
                         )
                     }
                 }
@@ -160,17 +187,19 @@ fun AuthScreen(onAuthenticated: () -> Unit = {}, vm: AuthViewModel = viewModel()
     }
 }
 
-//my preview :)
+// preview only
 @Preview(name = "Auth Simple", widthDp = 360, heightDp = 640)
 @Composable
-private fun PreviewAuthSimple() { AppTheme { AuthScreen() } }
+private fun PreviewAuthSimple() {
+    AppTheme { AuthScreen() }
+}
 
 @Composable
 private fun LocalNameSection(
     name: String,
     error: String?,
     onNameChange: (String) -> Unit,
-    onSubmit: () -> Unit
+    onSubmit: () -> Unit,
 ) {
     OutlinedTextField(
         value = name,
@@ -179,12 +208,13 @@ private fun LocalNameSection(
         placeholder = { Text(stringResource(id = R.string.placeholder_enter_your_name)) },
         singleLine = true,
         isError = error != null,
-        keyboardOptions = KeyboardOptions(
-            capitalization = KeyboardCapitalization.Words,
-            imeAction = ImeAction.Done
-        ),
+        keyboardOptions =
+            KeyboardOptions(
+                capitalization = KeyboardCapitalization.Words,
+                imeAction = ImeAction.Done,
+            ),
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp)
+        shape = RoundedCornerShape(14.dp),
     )
     if (error != null) {
         Spacer(Modifier.height(4.dp))
@@ -195,7 +225,7 @@ private fun LocalNameSection(
         onClick = onSubmit,
         modifier = Modifier.fillMaxWidth().height(52.dp),
         shape = RoundedCornerShape(16.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF789C93))
+        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF789C93)),
     ) {
         Text(stringResource(id = R.string.button_continue), fontSize = 16.sp, color = Color.White)
     }

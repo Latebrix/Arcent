@@ -1,15 +1,18 @@
 package tech.arcent.home
 
-/* UI model mapped from domain */
 data class Achievement(
     val id: String,
     val title: String,
     val achievedAt: Long,
     val tags: List<String>,
-    val photoUrl: String?
+    val photoUrl: String?,
 )
 
-sealed interface AllListItem { data class DateHeader(val dayStartMillis: Long): AllListItem; data class Entry(val achievement: Achievement): AllListItem }
+sealed interface AllListItem {
+    data class DateHeader(val dayStartMillis: Long) : AllListItem
+
+    data class Entry(val achievement: Achievement) : AllListItem
+}
 
 data class HomeUiState(
     val achievements: List<Achievement> = emptyList(),
@@ -23,5 +26,5 @@ data class HomeUiState(
     val searching: Boolean = false,
     val searchQuery: String = "",
     val searchResults: List<Achievement> = emptyList(),
-    val searchLoading: Boolean = false
+    val searchLoading: Boolean = false,
 )

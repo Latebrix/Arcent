@@ -1,9 +1,14 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
     id("org.jetbrains.kotlin.kapt")
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
+    id("io.sentry.android.gradle") version "4.9.0"
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -25,8 +30,28 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
+        }
+        getByName("debug") {
+            val secretsProps =
+                Properties().apply {
+                    val f = rootProject.file("secrets.properties")
+                    if (f.exists()) load(f.inputStream())
+                }
+            val sentryDsn = secretsProps.getProperty("SENTRY_DSN", "")
+            buildConfigField("String", "SENTRY_DSN", "\"${sentryDsn}\"")
+            buildConfigField("boolean", "SENTRY_ENABLED", sentryDsn.isNotBlank().toString())
+        }
+        getByName("release") {
+            val secretsProps =
+                Properties().apply {
+                    val f = rootProject.file("secrets.properties")
+                    if (f.exists()) load(f.inputStream())
+                }
+            val sentryDsn = secretsProps.getProperty("SENTRY_DSN", "")
+            buildConfigField("String", "SENTRY_DSN", "\"${sentryDsn}\"")
+            buildConfigField("boolean", "SENTRY_ENABLED", sentryDsn.isNotBlank().toString())
         }
     }
     compileOptions {
@@ -86,4 +111,11 @@ dependencies {
     implementation("androidx.room:room-ktx:2.6.1")
     kapt("androidx.room:room-compiler:2.6.1")
     implementation("androidx.compose.animation:animation")
+    implementation("io.sentry:sentry-android-core:7.18.0")
+    implementation("com.google.dagger:hilt-android:2.51.1")
+    kapt("com.google.dagger:hilt-compiler:2.51.1")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
+    androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
+    androidTestImplementation("androidx.test:core:1.5.0")
 }

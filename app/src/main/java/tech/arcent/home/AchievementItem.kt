@@ -25,26 +25,33 @@ import tech.arcent.R
 import java.text.DateFormat
 import java.util.Date
 
-/* achievementItem used by home, search, and all screens with placeholder while loading */
+/*
+ achievementItem used by home, search, and all screens
+ */
 @Composable
-internal fun AchievementItem(achievement: Achievement, modifier: Modifier = Modifier) {
+internal fun AchievementItem(
+    achievement: Achievement,
+    modifier: Modifier = Modifier,
+) {
     Surface(
         color = Color(0xFF2C2C2E),
         shape = RoundedCornerShape(16.dp),
         onClick = {},
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth(),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             val placeholderRes = R.drawable.ic_splash
             Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(RoundedCornerShape(12.dp))
+                modifier =
+                    Modifier
+                        .size(56.dp)
+                        .clip(RoundedCornerShape(12.dp)),
             ) {
                 if (achievement.photoUrl != null) {
                     AsyncImage(
@@ -54,14 +61,14 @@ internal fun AchievementItem(achievement: Achievement, modifier: Modifier = Modi
                         placeholder = painterResource(id = placeholderRes),
                         error = painterResource(id = placeholderRes),
                         fallback = painterResource(id = placeholderRes),
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize(),
                     )
                 } else {
                     Image(
                         painter = painterResource(id = placeholderRes),
                         contentDescription = achievement.title,
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize(),
                     )
                 }
             }
@@ -94,13 +101,13 @@ private fun formatTimestamp(epoch: Long): String {
 internal fun AchievementTag(text: String) {
     Surface(
         color = Color(0xFF3A3A3C),
-        shape = RoundedCornerShape(8.dp)
+        shape = RoundedCornerShape(8.dp),
     ) {
         Text(
             text = text,
             color = Color.White,
             style = MaterialTheme.typography.labelMedium,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
         )
     }
 }

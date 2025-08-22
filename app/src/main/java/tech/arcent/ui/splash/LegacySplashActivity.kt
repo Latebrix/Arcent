@@ -4,13 +4,12 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import java.util.Timer
-import kotlin.concurrent.schedule
 import tech.arcent.MainActivity
 import tech.arcent.R
+import java.util.Timer
+import kotlin.concurrent.schedule
 
 class LegacySplashActivity : AppCompatActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
@@ -18,7 +17,7 @@ class LegacySplashActivity : AppCompatActivity() {
 
         splashScreen.setKeepOnScreenCondition { true }
 
-        Timer().schedule(1500){
+        Timer().schedule(1500) {
             routeToNextActivity()
         }
     }

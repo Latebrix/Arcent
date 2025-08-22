@@ -1,10 +1,10 @@
 package tech.arcent.ui
 
-import androidx.compose.runtime.*
 import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.lifecycle.viewmodel.compose.viewModel
-import tech.arcent.auth.AuthViewModel
 import tech.arcent.auth.AuthScreen
+import tech.arcent.auth.AuthViewModel
 import tech.arcent.home.HomeScreen
 
 /*

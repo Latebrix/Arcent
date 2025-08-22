@@ -11,44 +11,48 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-/* Color palette */
+// Color palette
 private val PrimaryTeal = Color(0xFF00A99D)
 private val DarkBackground = Color(0xFF1C1C1E)
 private val OnDarkBackground = Color.White
 private val LightGray = Color(0xFF8A8A8E)
 
-private val DarkColorScheme: ColorScheme = darkColorScheme(
-    primary = PrimaryTeal,
-    background = DarkBackground,
-    onBackground = OnDarkBackground,
-    surface = DarkBackground,
-    onSurface = OnDarkBackground,
-    onPrimary = Color.White,
-    secondaryContainer = LightGray,
-    onSurfaceVariant = LightGray
-)
-
-/* Typography */
-val CustomTypography = Typography(
-    headlineLarge = TextStyle(
-        fontFamily = FontFamily.Serif,
-        fontWeight = FontWeight.Bold,
-        fontSize = 24.sp,
-        lineHeight = 28.sp
-    ),
-    bodyLarge = TextStyle(
-        fontFamily = FontFamily.SansSerif,
-        fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-        lineHeight = 20.sp
+private val DarkColorScheme: ColorScheme =
+    darkColorScheme(
+        primary = PrimaryTeal,
+        background = DarkBackground,
+        onBackground = OnDarkBackground,
+        surface = DarkBackground,
+        onSurface = OnDarkBackground,
+        onPrimary = Color.White,
+        secondaryContainer = LightGray,
+        onSurfaceVariant = LightGray,
     )
-)
+
+// Typography
+val CustomTypography =
+    Typography(
+        headlineLarge =
+            TextStyle(
+                fontFamily = FontFamily.Serif,
+                fontWeight = FontWeight.Bold,
+                fontSize = 24.sp,
+                lineHeight = 28.sp,
+            ),
+        bodyLarge =
+            TextStyle(
+                fontFamily = FontFamily.SansSerif,
+                fontWeight = FontWeight.Normal,
+                fontSize = 16.sp,
+                lineHeight = 20.sp,
+            ),
+    )
 
 @Composable
 fun AppTheme(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = DarkColorScheme,
         typography = CustomTypography,
-        content = content
+        content = content,
     )
 }

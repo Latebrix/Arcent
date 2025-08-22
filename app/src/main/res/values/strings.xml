@@ -110,4 +110,7 @@
     <string name="search_title_bar">Search</string>
     <string name="search_hint_inline">Search your achievements...</string>
     <string name="stats_placeholder">Stats coming soon</string>
+    <string name="sentry_test_crash">Test Sentry Crash</string>
+    <string name="sentry_test_nonfatal">Test Non-Fatal Capture</string>
+    <string name="sentry_test_nonfatal_event">Non fatal test event from stats screen</string>
 </resources>
