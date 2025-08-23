@@ -113,4 +113,22 @@
     <string name="sentry_test_crash">Test Sentry Crash</string>
     <string name="sentry_test_nonfatal">Test Non-Fatal Capture</string>
     <string name="sentry_test_nonfatal_event">Non fatal test event from stats screen</string>
+    <string name="stats_counter">Counter: %1$d</string>
+    <string name="stats_increment">Increment Counter</string>
+    <!-- Win Details Screen -->
+    <string name="win_details_title">Win Details</string>
+    <string name="win_details_category">Category</string>
+    <string name="win_details_tags">Tags</string>
+    <string name="win_details_details">Details</string>
+    <string name="win_details_edit">Edit</string>
+    <string name="win_details_delete">Delete Achievement</string>
+    <string name="win_details_delete_confirm">Delete</string>
+    <string name="win_details_delete_cancel">Cancel</string>
+    <string name="win_details_delete_sheet_title">Actions</string>
+    <string name="win_details_deleting">Deleting…</string>
+    <string name="win_details_today">Today</string>
+    <string name="win_details_yesterday">Yesterday</string>
+    <string name="add_update">Save Changes</string>
+    <string name="win_details_duplicate">Duplicate Achievement</string>
+    <string name="win_details_duplicating">Duplicating…</string>
 </resources>

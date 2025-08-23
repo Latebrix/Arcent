@@ -27,6 +27,8 @@ data class AddAchievementUiState(
     val showAddCategoryDialog: Boolean = false,
     val showAddTagDialog: Boolean = false,
     val isSaving: Boolean = false,
+    val editingId: String? = null,
+    val existingPhotoUrl: String? = null,
 )
 
 /*

@@ -47,7 +47,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -102,7 +101,7 @@ fun AddAchievementScreen(
     DisposableEffect(Unit) {
         onDispose {
             systemUi.setStatusBarColor(Color(0xFF1C1C1E), false)
-            systemUi.setNavigationBarColor(Color(0xFF2C2C2E), false)
+            systemUi.setNavigationBarColor(Color(0xFF1C1C1E), false)
         }
     }
     val imagePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -231,7 +230,7 @@ private fun AddAchievementBottomBar(
             .fillMaxWidth()
             .background(darkBackground)
             .navigationBarsPadding()
-            .padding(horizontal = 16.dp, vertical = 6.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -250,6 +249,7 @@ private fun AddAchievementBottomBar(
                 modifier = Modifier.size(20.dp),
             )
         }
+        val label = if (state.editingId != null) stringResource(id = R.string.add_update) else stringResource(id = R.string.add_save)
         Button(
             onClick = onSave,
             modifier = Modifier
@@ -263,7 +263,7 @@ private fun AddAchievementBottomBar(
                 CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp, color = Color.White)
                 Spacer(modifier = Modifier.width(8.dp))
             }
-            Text(stringResource(id = R.string.add_save), color = Color.White, fontSize = 16.sp)
+            Text(label, color = Color.White, fontSize = 16.sp)
         }
     }
 }
@@ -286,23 +286,34 @@ private fun AddAchievementImagePicker(
             .clickable { imagePicker() },
         contentAlignment = Alignment.Center,
     ) {
-        if (state.imageUri != null) {
-            AsyncImage(
-                model = state.imageUri,
-                contentDescription = stringResource(id = R.string.cd_add_image),
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop,
-            )
-        } else {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(
-                    painter = painterResource(id = R.drawable.icons_add_image),
+        when {
+            state.imageUri != null -> {
+                AsyncImage(
+                    model = state.imageUri,
                     contentDescription = stringResource(id = R.string.cd_add_image),
-                    tint = textSecondary,
-                    modifier = Modifier.size(38.dp),
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop,
                 )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(stringResource(id = R.string.add_add_image), color = textSecondary, fontSize = 13.sp)
+            }
+            state.existingPhotoUrl != null -> {
+                AsyncImage(
+                    model = state.existingPhotoUrl,
+                    contentDescription = stringResource(id = R.string.cd_add_image),
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop,
+                )
+            }
+            else -> {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.icons_add_image),
+                        contentDescription = stringResource(id = R.string.cd_add_image),
+                        tint = textSecondary,
+                        modifier = Modifier.size(38.dp),
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(stringResource(id = R.string.add_add_image), color = textSecondary, fontSize = 13.sp)
+                }
             }
         }
     }

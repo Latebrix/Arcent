@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import tech.arcent.R
+import tech.arcent.home.Achievement
 import tech.arcent.home.AchievementItem
 import tech.arcent.home.AllListItem
 import tech.arcent.home.HomeUiState
@@ -65,6 +66,7 @@ fun SimpleAllScreen(
     state: HomeUiState,
     onBack: () -> Unit,
     onLoadMore: () -> Unit,
+    onOpenDetails: (Achievement) -> Unit,
 ) {
     val listState = rememberLazyListState()
     Column(Modifier.fillMaxSize().background(Color(0xFF1C1C1E))) {
@@ -88,7 +90,7 @@ fun SimpleAllScreen(
                     when (item) {
                         is AllListItem.DateHeader -> DateHeaderRow(item.dayStartMillis)
                         is AllListItem.Entry -> {
-                            AchievementItem(item.achievement, modifier = Modifier.fillMaxWidth())
+                            AchievementItem(item.achievement, modifier = Modifier.fillMaxWidth(), onClick = { onOpenDetails(item.achievement) })
                             Spacer(Modifier.height(12.dp))
                         }
                     }
@@ -116,12 +118,11 @@ fun SimpleSearchScreen(
     state: HomeUiState,
     onBack: () -> Unit,
     onQueryChange: (String) -> Unit,
+    onOpenDetails: (Achievement) -> Unit,
 ) {
     var internalQuery by remember(state.searchQuery) { mutableStateOf(state.searchQuery) }
     Column(Modifier.fillMaxSize().background(Color(0xFF1C1C1E))) {
-        SimpleTopBar(title = stringResource(id = R.string.search_title_bar), onBack = onBack) {
-            // inline search field
-        }
+        SimpleTopBar(title = stringResource(id = R.string.search_title_bar), onBack = onBack) { }
         Box(Modifier.padding(16.dp)) {
             Surface(
                 color = Color(0xFF2C2C2E),
@@ -157,7 +158,7 @@ fun SimpleSearchScreen(
                 val listState = rememberLazyListState()
                 LazyColumn(state = listState, contentPadding = PaddingValues(16.dp), modifier = Modifier.fillMaxSize()) {
                     items(state.searchResults, key = { it.id }) { a ->
-                        AchievementItem(a, modifier = Modifier.fillMaxWidth())
+                        AchievementItem(a, modifier = Modifier.fillMaxWidth(), onClick = { onOpenDetails(a) })
                         Spacer(Modifier.height(12.dp))
                     }
                     item { Spacer(Modifier.height(32.dp)) }

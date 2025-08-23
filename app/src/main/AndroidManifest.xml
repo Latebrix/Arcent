@@ -11,8 +11,9 @@
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launch"
+        android:roundIcon="@mipmap/ic_launch_round"
         android:label="@string/app_name"
-        android:supportsRtl="true"
+        android:supportsRtl="false"
         android:theme="@style/Theme.Arcent">
         <!-- disable sentry auto provider init so blank DSN does not crash; we do manual init in ArcentApp -->
         <meta-data android:name="io.sentry.auto-init" android:value="false" />

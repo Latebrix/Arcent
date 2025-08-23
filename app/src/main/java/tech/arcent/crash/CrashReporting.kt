@@ -20,7 +20,6 @@ object CrashReporting {
     @Volatile
     private var coroutineHandler: CoroutineExceptionHandler? = null
 
-    // background scope for flush so ui thread never blocked
     private val flushScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private const val FLUSH_TIMEOUT_MS = 2000L
 
@@ -38,7 +37,7 @@ object CrashReporting {
         }
     }
 
-    // capture non fatal
+    /* capture non fatal */
     fun nonFatal(
         message: String,
         cause: Throwable? = null,
@@ -83,13 +82,25 @@ object CrashReporting {
             onError(e)
         }
 
-    // ah, schedule flush on background
+    /* schedule flush on background */
     private fun scheduleFlush() {
         flushScope.launch {
             try {
                 Sentry.flush(FLUSH_TIMEOUT_MS)
             } catch (_: Exception) {
             }
+        }
+    }
+
+    fun breadcrumb(category: String, message: String) {
+        if (!enabled) return
+        try {
+            val b = Breadcrumb()
+            b.category = category
+            b.message = message
+            b.level = SentryLevel.INFO
+            Sentry.addBreadcrumb(b)
+        } catch (_: Exception) {
         }
     }
 }

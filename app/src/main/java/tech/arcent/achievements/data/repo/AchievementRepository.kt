@@ -34,6 +34,19 @@ interface AchievementRepository {
     suspend fun addAchievement(req: AchievementCreateRequest): AchievementDomain =
         addAchievement(req.title, req.details, req.achievedAt, req.photo, req.categories, req.tags)
 
+    suspend fun updateAchievement(
+        id: String,
+        title: String,
+        details: String?,
+        achievedAt: Long,
+        photo: AchievementPhoto?,
+        currentPhotoUrl: String?,
+        categories: List<String>,
+        tags: List<String>,
+    ): AchievementDomain
+
+    suspend fun deleteAchievement(id: String)
+
     fun recentFlow(limit: Int): Flow<List<AchievementDomain>>
 
     suspend fun loadPage(

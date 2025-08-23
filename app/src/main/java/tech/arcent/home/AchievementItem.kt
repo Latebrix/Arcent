@@ -32,11 +32,12 @@ import java.util.Date
 internal fun AchievementItem(
     achievement: Achievement,
     modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
 ) {
     Surface(
         color = Color(0xFF2C2C2E),
         shape = RoundedCornerShape(16.dp),
-        onClick = {},
+        onClick = { onClick?.invoke() },
         modifier = modifier.fillMaxWidth(),
     ) {
         Row(

@@ -1,11 +1,15 @@
 package tech.arcent.home
 
+/* UI layer achievement model includes optional rich (not poor :)) fields (details, categories) for details screen */
+
 data class Achievement(
     val id: String,
     val title: String,
     val achievedAt: Long,
     val tags: List<String>,
     val photoUrl: String?,
+    val details: String? = null,
+    val categories: List<String> = emptyList(),
 )
 
 sealed interface AllListItem {

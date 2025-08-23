@@ -1,7 +1,7 @@
 package tech.arcent.home
 
 /*
- ViewModel for home screen: manages recent wins, paging, and search; injected repository via Hilt.
+ ViewModel for home screen: manages recent wins, paging, search,  detail updates/deletes.
  */
 
 import androidx.lifecycle.ViewModel
@@ -39,13 +39,9 @@ class HomeViewModel
             loadMoreInternal(reset = true)
         }
 
-        fun toggleAll() {
-            _uiState.value = _uiState.value.copy(showingAll = !_uiState.value.showingAll)
-        }
+        fun toggleAll() { _uiState.value = _uiState.value.copy(showingAll = !_uiState.value.showingAll) }
 
-        fun loadMore() {
-            if (!_uiState.value.loadingMore && _uiState.value.nextCursor != null) loadMoreInternal()
-        }
+        fun loadMore() { if (!_uiState.value.loadingMore && _uiState.value.nextCursor != null) loadMoreInternal() }
 
         private fun loadMoreInternal(reset: Boolean = false) {
             viewModelScope.launch {
@@ -83,18 +79,11 @@ class HomeViewModel
         }
 
         // Search
-        fun openSearch() {
-            _uiState.value = _uiState.value.copy(searching = true, searchQuery = "", searchResults = emptyList(), searchLoading = false)
-        }
+        fun openSearch() { _uiState.value = _uiState.value.copy(searching = true, searchQuery = "", searchResults = emptyList(), searchLoading = false) }
 
-        fun closeSearch() {
-            _uiState.value = _uiState.value.copy(searching = false, searchQuery = "", searchResults = emptyList(), searchLoading = false)
-        }
+        fun closeSearch() { _uiState.value = _uiState.value.copy(searching = false, searchQuery = "", searchResults = emptyList(), searchLoading = false) }
 
-        fun onSearchQueryChange(q: String) {
-            _uiState.value = _uiState.value.copy(searchQuery = q)
-            triggerSearchDebounced()
-        }
+        fun onSearchQueryChange(q: String) { _uiState.value = _uiState.value.copy(searchQuery = q); triggerSearchDebounced() }
 
         private fun triggerSearchDebounced() {
             searchJob?.cancel()
@@ -114,8 +103,36 @@ class HomeViewModel
         }
 
         fun onNewAchievement(a: Achievement) {
-            val all = listOf(a) + _uiState.value.allAchievements
+            val current = _uiState.value
+            val existingIdx = current.allAchievements.indexOfFirst { it.id == a.id }
+            val baseList = current.allAchievements.toMutableList()
+            if (existingIdx >= 0) {
+                baseList[existingIdx] = a
+            } else {
+                baseList.add(0, a)
+            }
+            //
+            val sorted = baseList.sortedWith(compareByDescending<Achievement> { it.achievedAt }.thenByDescending { if (it.id == a.id) 1 else 0 })
+            val grouped = buildAllListItems(sorted)
+            val recents = current.achievements.toMutableList().let { list ->
+                val recIdx = list.indexOfFirst { it.id == a.id }
+                if (recIdx >= 0) list[recIdx] = a else list.add(0, a)
+                list.take(recentLimit)
+            }
+            val searchResults = current.searchResults.map { if (it.id == a.id) a else it }
+            _uiState.value = current.copy(allAchievements = sorted, allListItems = grouped, achievements = recents, searchResults = searchResults)
+        }
+
+        fun onDeleteAchievement(id: String) {
+            val current = _uiState.value
+            val all = current.allAchievements.filterNot { it.id == id }
             val grouped = buildAllListItems(all)
-            _uiState.value = _uiState.value.copy(allAchievements = all, allListItems = grouped)
+            val recents = current.achievements.filterNot { it.id == id }
+            val search = current.searchResults.filterNot { it.id == id }
+            _uiState.value = current.copy(allAchievements = all, allListItems = grouped, achievements = recents, searchResults = search)
+        }
+
+        fun deleteAchievement(id: String) {
+            viewModelScope.launch { runCatching { repo.deleteAchievement(id) }; onDeleteAchievement(id) }
         }
     }

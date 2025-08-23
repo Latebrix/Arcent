@@ -113,6 +113,78 @@ internal class RemoteAchievementRepository(private val context: Context, private
             }
         }
 
+    // update achievement remote
+    override suspend fun updateAchievement(
+        id: String,
+        title: String,
+        details: String?,
+        achievedAt: Long,
+        photo: AchievementPhoto?,
+        currentPhotoUrl: String?,
+        categories: List<String>,
+        tags: List<String>,
+    ): AchievementDomain =
+        withContext(io) {
+            try {
+                val c = client()
+                val acc = Account(c).get()
+                val userId = acc.id
+                var finalPhoto = currentPhotoUrl
+                if (photo != null) {
+                    val uploaded =
+                        storage(c).createFile(
+                            bucketId = BuildConfig.APPWRITE_BUCKET_ID,
+                            fileId = ID.unique(),
+                            file = InputFile.fromBytes(photo.bytes, photo.fileName, photo.mime),
+                            permissions =
+                                listOf(
+                                    Permission.read(Role.user(userId)),
+                                    Permission.update(Role.user(userId)),
+                                    Permission.delete(Role.user(userId)),
+                                ),
+                        )
+                    finalPhoto = "${BuildConfig.appwrite_endpoint}/storage/buckets/${BuildConfig.APPWRITE_BUCKET_ID}/files/${uploaded.id}/view?project=${BuildConfig.appwrite_project_id}"
+                }
+                val iso = iso8601(achievedAt)
+                databases(c).updateDocument(
+                    databaseId = BuildConfig.APPWRITE_DATABASE_ID,
+                    collectionId = BuildConfig.APPWRITE_COLLECTION_ID,
+                    documentId = id,
+                    data = mapOf(
+                        "title" to title,
+                        "details" to (details ?: ""),
+                        "achievedAt" to iso,
+                        "photoUrl" to (finalPhoto ?: ""),
+                        "categories" to categories,
+                        "tags" to tags,
+                    ),
+                )
+                val domain = AchievementDomain(id, title, details, achievedAt, finalPhoto, categories, tags)
+                recentFlowInternal.value = recentFlowInternal.value.map { if (it.id == id) domain else it }
+                domain
+            } catch (e: Exception) {
+                CrashReporting.capture(e)
+                AchievementDomain(id, title, details, achievedAt, currentPhotoUrl, categories, tags)
+            }
+        }
+
+    // delete achievement remote
+    override suspend fun deleteAchievement(id: String) {
+        withContext(io) {
+            try {
+                val c = client()
+                databases(c).deleteDocument(
+                    databaseId = BuildConfig.APPWRITE_DATABASE_ID,
+                    collectionId = BuildConfig.APPWRITE_COLLECTION_ID,
+                    documentId = id,
+                )
+                recentFlowInternal.value = recentFlowInternal.value.filterNot { it.id == id }
+            } catch (e: Exception) {
+                CrashReporting.capture(e)
+            }
+        }
+    }
+
     // recent flow lazy load first page safe
     override fun recentFlow(limit: Int): Flow<List<AchievementDomain>> {
         if (!loadedRecent) {

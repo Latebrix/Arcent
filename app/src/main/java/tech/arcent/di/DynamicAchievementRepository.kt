@@ -42,6 +42,19 @@ internal class DynamicAchievementRepository(
         tags,
     )
 
+    override suspend fun updateAchievement(
+        id: String,
+        title: String,
+        details: String?,
+        achievedAt: Long,
+        photo: AchievementPhoto?,
+        currentPhotoUrl: String?,
+        categories: List<String>,
+        tags: List<String>,
+    ) = active().updateAchievement(id, title, details, achievedAt, photo, currentPhotoUrl, categories, tags)
+
+    override suspend fun deleteAchievement(id: String) = active().deleteAchievement(id)
+
     override fun recentFlow(limit: Int) = active().recentFlow(limit)
 
     override suspend fun loadPage(

@@ -11,4 +11,6 @@ fun tech.arcent.achievements.domain.AchievementDomain.toUi(): tech.arcent.home.A
         achievedAt = achievedAt,
         tags = tags,
         photoUrl = photoUrl,
+        details = details,
+        categories = categories,
     )

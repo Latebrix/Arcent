@@ -1,6 +1,8 @@
 package tech.arcent.appinit
 
-// app start stuff: init sentry only when dsn not blank + set global handlers kinda simple but effective
+/*
+ app start stuff: init sentry only when dsn not blank + set global handlers kinda simple but effective
+ */
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
@@ -23,7 +25,7 @@ class ArcentApp : Application() {
         installGlobalHandlers()
     }
 
-    // only initialize sentry when enabled + dsn non blank else skip completely
+    /* only initialize sentry when enabled + dsn non blank else skip completely */
     private fun initSentryIfEnabled() {
         val enabled = BuildConfig.SENTRY_ENABLED && BuildConfig.SENTRY_DSN.isNotBlank()
         if (enabled) {
@@ -35,18 +37,20 @@ class ArcentApp : Application() {
                 opts.isAttachScreenshot = true
                 opts.isAttachViewHierarchy = true
                 opts.setDiagnosticLevel(SentryLevel.ERROR)
+                /* Session Replay configuration */
+                opts.sessionReplay.onErrorSampleRate = 1.0
+                opts.sessionReplay.sessionSampleRate = if (BuildConfig.DEBUG) 1.0 else 0.1
             }
         } else {
             CrashReporting.disable()
         }
     }
 
-    // set default handlers for any uncaught exception + forward to sentry if active
+    /* set default handlers for any uncaught exception + forward to sentry if active */
     private fun installGlobalHandlers() {
         safeInstallDefaultHandler { throwable ->
             CrashReporting.capture(throwable)
         }
         CrashReporting.setCoroutineHandler(globalCoroutineExceptionHandler)
-        // TODO: maybe later add strictmode or anr hooks idk
     }
 }

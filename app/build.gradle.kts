@@ -7,7 +7,7 @@ plugins {
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
     id("org.jetbrains.kotlin.kapt")
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
-    id("io.sentry.android.gradle") version "4.9.0"
+    id("io.sentry.android.gradle") version "5.9.0"
     id("com.google.dagger.hilt.android")
 }
 
@@ -39,7 +39,8 @@ android {
                     val f = rootProject.file("secrets.properties")
                     if (f.exists()) load(f.inputStream())
                 }
-            val sentryDsn = secretsProps.getProperty("SENTRY_DSN", "")
+            val sentryDsnRaw = secretsProps.getProperty("SENTRY_DSN", "")
+            val sentryDsn = sentryDsnRaw.trim().removeSurrounding("\"")
             buildConfigField("String", "SENTRY_DSN", "\"${sentryDsn}\"")
             buildConfigField("boolean", "SENTRY_ENABLED", sentryDsn.isNotBlank().toString())
         }
@@ -49,7 +50,8 @@ android {
                     val f = rootProject.file("secrets.properties")
                     if (f.exists()) load(f.inputStream())
                 }
-            val sentryDsn = secretsProps.getProperty("SENTRY_DSN", "")
+            val sentryDsnRaw = secretsProps.getProperty("SENTRY_DSN", "")
+            val sentryDsn = sentryDsnRaw.trim().removeSurrounding("\"")
             buildConfigField("String", "SENTRY_DSN", "\"${sentryDsn}\"")
             buildConfigField("boolean", "SENTRY_ENABLED", sentryDsn.isNotBlank().toString())
         }
@@ -111,7 +113,7 @@ dependencies {
     implementation("androidx.room:room-ktx:2.6.1")
     kapt("androidx.room:room-compiler:2.6.1")
     implementation("androidx.compose.animation:animation")
-    implementation("io.sentry:sentry-android-core:7.18.0")
+    implementation("io.sentry:sentry-android:8.19.1")
     implementation("com.google.dagger:hilt-android:2.51.1")
     kapt("com.google.dagger:hilt-compiler:2.51.1")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")

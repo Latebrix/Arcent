@@ -43,6 +43,7 @@ internal fun WinsContent(
     onLoadMore: () -> Unit,
     onOpenSearch: () -> Unit,
     onSearchQueryChange: (String) -> Unit,
+    onOpenDetails: (Achievement) -> Unit,
 ) {
     val listState = rememberLazyListState()
     Column(Modifier.fillMaxSize()) {
@@ -91,7 +92,7 @@ internal fun WinsContent(
                     }
                 } else {
                     items(state.achievements, key = { it.id }) { achievement ->
-                        AchievementItem(achievement, modifier = Modifier.fillMaxWidth())
+                        AchievementItem(achievement, modifier = Modifier.fillMaxWidth(), onClick = { onOpenDetails(achievement) })
                         Spacer(modifier = Modifier.height(12.dp))
                     }
                 }
@@ -224,14 +225,14 @@ internal fun FirstWinPrompt(modifier: Modifier = Modifier) {
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.smile),
-                contentDescription = "Smile",
+                contentDescription = null,
                 tint = Color.Unspecified,
-                modifier = Modifier.size(56.dp),
+                modifier = Modifier.size(72.dp).padding(end = 20.dp),
             )
-            Spacer(modifier = Modifier.width(16.dp))
-            Column {
-                Text(stringResource(id = R.string.home_first_win_title), color = Color.White, fontWeight = FontWeight.Bold)
-                Text(stringResource(id = R.string.home_first_win_subtitle), color = Color.Gray, style = MaterialTheme.typography.bodyMedium)
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(id = R.string.home_first_win_title), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Spacer(Modifier.height(4.dp))
+                Text(stringResource(id = R.string.home_first_win_subtitle), color = Color(0xFFBBBBBB), fontSize = 13.sp)
             }
         }
     }

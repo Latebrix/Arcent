@@ -8,8 +8,8 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-// Build styled annotated markdown (headings, quote, bold, italic).
-internal fun buildStyledMarkdown(
+/* Build styled annotated markdown (headings, quote, bold, italic). */
+fun buildStyledMarkdown(
     raw: String,
     accent: Color,
 ): AnnotatedString =

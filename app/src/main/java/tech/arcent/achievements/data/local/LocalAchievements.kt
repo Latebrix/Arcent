@@ -40,6 +40,9 @@ internal interface AchievementDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(e: AchievementEntity)
 
+    @Query("DELETE FROM achievements WHERE id = :id")
+    suspend fun delete(id: String)
+
     @Query("SELECT * FROM achievements ORDER BY achievedAt DESC LIMIT :limit")
     fun recent(limit: Int): Flow<List<AchievementEntity>>
 
@@ -131,6 +134,53 @@ internal class LocalAchievementRepository(private val context: Context, private 
                 newLocalAchievement("local_error", details, System.currentTimeMillis(), null, emptyList(), emptyList())
             }
         }
+
+    override suspend fun updateAchievement(
+        id: String,
+        title: String,
+        details: String?,
+        achievedAt: Long,
+        photo: AchievementPhoto?,
+        currentPhotoUrl: String?,
+        categories: List<String>,
+        tags: List<String>,
+    ): AchievementDomain =
+        withContext(io) {
+            try {
+                val newPhoto =
+                    photo?.let {
+                        try {
+                            val dir = File(context.filesDir, "achievements_photos").apply { if (!exists()) mkdirs() }
+                            val ext =
+                                when {
+                                    it.mime.contains("png", true) -> "png"
+                                    it.mime.contains("webp", true) -> "webp"
+                                    else -> "jpg"
+                                }
+                            val file = File(dir, "${System.currentTimeMillis()}_${title.hashCode()}.$ext")
+                            runCatching { file.writeBytes(it.bytes) }
+                            if (file.exists()) file.absolutePath else null
+                        } catch (e: Exception) {
+                            CrashReporting.capture(e)
+                            null
+                        }
+                    }
+                val finalPhotoUrl = newPhoto?.let { "file://" + it } ?: currentPhotoUrl
+                val domain = AchievementDomain(id, title, details, achievedAt, finalPhotoUrl, categories, tags)
+                val entity = AchievementEntity(id, title, details, achievedAt, finalPhotoUrl, categories.toCsv(), tags.toCsv())
+                try { dao.insert(entity) } catch (e: Exception) { CrashReporting.capture(e) }
+                domain
+            } catch (e: Exception) {
+                CrashReporting.capture(e)
+                AchievementDomain(id, title, details, achievedAt, currentPhotoUrl, categories, tags)
+            }
+        }
+
+    override suspend fun deleteAchievement(id: String) {
+        withContext(io) {
+            try { dao.delete(id) } catch (e: Exception) { CrashReporting.capture(e) }
+        }
+    }
 
     override fun recentFlow(limit: Int): Flow<List<AchievementDomain>> =
         dao.recent(limit).map { list ->
