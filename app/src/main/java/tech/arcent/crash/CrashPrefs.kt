@@ -1,7 +1,7 @@
 package tech.arcent.crash
 
 /*
- stores user preference for crash reporting opt in; default true on debug false on release
+ stores user preference for crash reporting opt in;
  */
 
 import android.content.Context
@@ -30,12 +30,13 @@ object CrashPrefs {
         prefs(context).edit().putBoolean(KEY_OPT_IN, value).putBoolean(KEY_SET, true).apply()
     }
 
-    fun isEnabled(context: Context, debug: Boolean): Boolean {
+    // Changed: default is now ALWAYS true (previously depended on build type: true debug / false release)
+    // The second parameter retained for binary compatibility but ignored for logic now.
+    fun isEnabled(context: Context, @Suppress("UNUSED_PARAMETER") debug: Boolean): Boolean {
         val p = prefs(context)
         if (!p.getBoolean(KEY_SET, false)) {
-            return debug
+            return true
         }
-        return p.getBoolean(KEY_OPT_IN, debug)
+        return p.getBoolean(KEY_OPT_IN, true)
     }
 }
-

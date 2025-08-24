@@ -25,6 +25,8 @@ object CrashReporting {
 
     fun disable() {
         enabled = false
+        // Fully close Sentry so SDK automatic handlers stop capturing
+        runCatching { Sentry.close() }
     }
 
     /* re enable capturing if user opted in again */

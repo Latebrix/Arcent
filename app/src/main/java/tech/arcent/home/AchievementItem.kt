@@ -47,7 +47,7 @@ internal fun AchievementItem(
                     .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            val placeholderRes = R.drawable.ic_splash
+            val placeholderRes = R.drawable.home_item_placeholder
             Box(
                 modifier =
                     Modifier

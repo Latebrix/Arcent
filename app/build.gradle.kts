@@ -11,9 +11,20 @@ plugins {
     id("com.google.dagger.hilt.android")
 }
 
+val secretsProps =
+    Properties().apply {
+        val f = rootProject.file("secrets.properties")
+        if (f.exists()) load(f.inputStream())
+    }
+
 android {
     namespace = "tech.arcent"
     compileSdk = 36
+
+    sentry {
+        org = secretsProps.getProperty("SENTRY_ORG")
+        projectName = secretsProps.getProperty("SENTRY_PROJECT")
+    }
 
     defaultConfig {
         applicationId = "tech.arcent"
@@ -35,11 +46,6 @@ android {
             )
         }
         getByName("debug") {
-            val secretsProps =
-                Properties().apply {
-                    val f = rootProject.file("secrets.properties")
-                    if (f.exists()) load(f.inputStream())
-                }
             val sentryDsnRaw = secretsProps.getProperty("SENTRY_DSN", "")
             val sentryDsn = sentryDsnRaw.trim().removeSurrounding("\"")
             buildConfigField("String", "SENTRY_DSN", "\"${sentryDsn}\"")
@@ -52,11 +58,6 @@ android {
             */
         }
         getByName("release") {
-            val secretsProps =
-                Properties().apply {
-                    val f = rootProject.file("secrets.properties")
-                    if (f.exists()) load(f.inputStream())
-                }
             val sentryDsnRaw = secretsProps.getProperty("SENTRY_DSN", "")
             val sentryDsn = sentryDsnRaw.trim().removeSurrounding("\"")
             buildConfigField("String", "SENTRY_DSN", "\"${sentryDsn}\"")

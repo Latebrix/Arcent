@@ -24,7 +24,7 @@
     <string name="cd_add">Add</string>
     <string name="cd_details">Details</string>
     <!-- Local mode info (Auth screen when using Room/local) -->
-    <string name="local_mode_info">You host on your own; no one can access your data + no privacy terms to accept :)</string>
+    <string name="local_mode_info">You host on your own; and all of your data will be saved locally.</string>
     <!-- New strings for name input -->
     <string name="label_your_name">Your name</string>
     <string name="placeholder_enter_your_name">Enter your name</string>

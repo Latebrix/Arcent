@@ -189,6 +189,8 @@ internal fun TopBar(
 @Composable
 internal fun RecentWinCard(modifier: Modifier = Modifier) {
     val shape = RoundedCornerShape(20.dp)
+    // Randomly pick one of the three banner images each time the composable enters composition
+    val bannerRes = remember { listOf(R.drawable.banner_one, R.drawable.banner_two, R.drawable.banner_three).random() }
     Surface(
         color = Color.Transparent,
         shape = shape,
@@ -199,7 +201,7 @@ internal fun RecentWinCard(modifier: Modifier = Modifier) {
                 .clip(shape),
     ) {
         Image(
-            painter = painterResource(id = R.drawable.ic_splash),
+            painter = painterResource(id = bannerRes),
             contentDescription = stringResource(id = R.string.cd_featured_win),
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize(),

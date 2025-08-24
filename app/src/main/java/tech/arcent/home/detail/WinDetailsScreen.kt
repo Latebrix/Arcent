@@ -220,7 +220,7 @@ private fun sameDay(a: Long, b: Long): Boolean {
 
 @Composable
 private fun AchievementImage(photoUrl: String?, title: String) {
-    val placeholder = R.drawable.ic_splash
+    val placeholder = R.drawable.win_image_placeholder
     val shape = RoundedCornerShape(16.dp)
     Box(
         modifier =

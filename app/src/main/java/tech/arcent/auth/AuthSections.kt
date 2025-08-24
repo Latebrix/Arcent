@@ -109,7 +109,7 @@ internal fun FooterText() {
         ) { offset ->
             annotated.getStringAnnotations(start = offset, end = offset).firstOrNull()?.let { ann ->
                 /*
-                 * External pages when clicked
+                 * External pages wh/en clicked
                  */
                 when (ann.tag) {
                     "terms" -> uriHandler.openUri("https://arcent.tech/terms")
