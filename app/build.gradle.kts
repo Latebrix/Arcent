@@ -19,15 +19,16 @@ android {
         applicationId = "tech.arcent"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.10 Beta"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
@@ -43,6 +44,12 @@ android {
             val sentryDsn = sentryDsnRaw.trim().removeSurrounding("\"")
             buildConfigField("String", "SENTRY_DSN", "\"${sentryDsn}\"")
             buildConfigField("boolean", "SENTRY_ENABLED", sentryDsn.isNotBlank().toString())
+            /*
+            val profileFun = secretsProps.getProperty("APPWRITE_PROFILE_IMAGES_FUN", "").trim()
+            buildConfigField("String", "APPWRITE_PROFILE_IMAGES_FUN", "\"${profileFun}\"")
+            val profileBucket = secretsProps.getProperty("APPWRITE_PROFILE_IMAGES_BUCKET", "").trim()
+            buildConfigField("String", "APPWRITE_PROFILE_IMAGES_BUCKET", "\"${profileBucket}\"")
+            */
         }
         getByName("release") {
             val secretsProps =
@@ -54,6 +61,12 @@ android {
             val sentryDsn = sentryDsnRaw.trim().removeSurrounding("\"")
             buildConfigField("String", "SENTRY_DSN", "\"${sentryDsn}\"")
             buildConfigField("boolean", "SENTRY_ENABLED", sentryDsn.isNotBlank().toString())
+            /*
+            val profileFun = secretsProps.getProperty("APPWRITE_PROFILE_IMAGES_FUN", "").trim()
+            buildConfigField("String", "APPWRITE_PROFILE_IMAGES_FUN", "\"${profileFun}\"")
+            val profileBucket = secretsProps.getProperty("APPWRITE_PROFILE_IMAGES_BUCKET", "").trim()
+            buildConfigField("String", "APPWRITE_PROFILE_IMAGES_BUCKET", "\"${profileBucket}\"")
+             */
         }
     }
     compileOptions {

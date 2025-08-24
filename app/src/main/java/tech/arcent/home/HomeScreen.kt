@@ -1,17 +1,11 @@
 package tech.arcent.home
 
 /*
- HomeScreen orchestrates navigation between main wins, add, all, search, stats, and details screens.
+ HomeScreen orchestrates navigation between main wins, add, all, search, stats, details, settings screens.
  */
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
+import androidx.compose.animation.*
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -22,31 +16,37 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import tech.arcent.addachievement.AddAchievementScreen
 import tech.arcent.addachievement.AddAchievementViewModel
+import tech.arcent.auth.AuthViewModel
 import tech.arcent.home.detail.WinDetailsRoute
 import tech.arcent.home.simple.SimpleAllScreen
 import tech.arcent.home.simple.SimpleSearchScreen
+import tech.arcent.settings.SettingsScreenHost
+import tech.arcent.settings.SettingsViewModel
 import tech.arcent.stats.StatsScreen
 
-private enum class HomeMode { MAIN, ADD, ALL, SEARCH, DETAIL }
+private enum class HomeMode { MAIN, ADD, ALL, SEARCH, DETAIL, SETTINGS }
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun HomeScreen(vm: HomeViewModel = hiltViewModel()) {
+fun HomeScreen(vm: HomeViewModel = hiltViewModel(), authVm: AuthViewModel = hiltViewModel()) {
     val state by vm.uiState.collectAsState()
     val systemUi = rememberSystemUiController()
     var mode by remember { mutableStateOf(HomeMode.MAIN) }
     var selectedTab by remember { mutableStateOf(0) }
     var selectedAchievement by remember { mutableStateOf<Achievement?>(null) }
     val addVm: AddAchievementViewModel = hiltViewModel()
+    val settingsVm: SettingsViewModel = hiltViewModel()
 
     LaunchedEffect(mode, selectedTab) {
-        val navColor = when (mode) { HomeMode.ALL, HomeMode.SEARCH, HomeMode.DETAIL -> Color(0xFF1C1C1E); else -> Color(0xFF2C2C2E) }
+        /* adjusted system nav color for layout without app bottom nav */
+        val navColor = Color(0xFF1C1C1E)
         systemUi.setStatusBarColor(Color(0xFF1C1C1E), false)
         systemUi.setNavigationBarColor(navColor, false)
     }
 
     BackHandler(enabled = true) {
         when {
+            mode == HomeMode.SETTINGS -> mode = HomeMode.MAIN
             selectedTab == 1 -> selectedTab = 0
             mode == HomeMode.DETAIL -> { mode = HomeMode.MAIN; selectedAchievement = null }
             mode != HomeMode.MAIN -> mode = HomeMode.MAIN
@@ -55,8 +55,8 @@ fun HomeScreen(vm: HomeViewModel = hiltViewModel()) {
 
     HomeScaffold(selectedTab = selectedTab, onTabChange = { idx ->
         selectedTab = idx
-        if (idx == 0 && mode != HomeMode.DETAIL) mode = HomeMode.MAIN
-    }, showBottomBar = (selectedTab == 0 && (mode == HomeMode.MAIN)) || selectedTab == 1) {
+        if (idx == 0 && mode !in listOf(HomeMode.DETAIL, HomeMode.ADD, HomeMode.SETTINGS)) mode = HomeMode.MAIN
+    }, showBottomBar = false /* bottom nav disabled this release */) {
         if (selectedTab == 1) {
             StatsScreen()
         } else {
@@ -82,12 +82,12 @@ fun HomeScreen(vm: HomeViewModel = hiltViewModel()) {
                             onOpenSearch = { mode = HomeMode.SEARCH },
                             onSearchQueryChange = { vm.onSearchQueryChange(it) },
                             onOpenDetails = { a -> selectedAchievement = a; mode = HomeMode.DETAIL },
+                            onOpenSettings = { mode = HomeMode.SETTINGS },
                         )
                     HomeMode.ADD ->
                         AddAchievementScreen(
                             vm = addVm,
                             onBack = {
-                                // always clear form on exit
                                 addVm.startNew()
                                 if (addVm.uiState.value.editingId != null && selectedAchievement != null) {
                                     mode = HomeMode.DETAIL
@@ -97,7 +97,7 @@ fun HomeScreen(vm: HomeViewModel = hiltViewModel()) {
                             },
                             onSaved = { a ->
                                 vm.onNewAchievement(a)
-                                addVm.startNew() // clear after save
+                                addVm.startNew()
                                 if (selectedAchievement?.id == a.id) {
                                     selectedAchievement = a
                                     mode = HomeMode.DETAIL
@@ -134,13 +134,16 @@ fun HomeScreen(vm: HomeViewModel = hiltViewModel()) {
                                     selectedAchievement = null
                                     mode = HomeMode.MAIN
                                 },
-                                onDuplicated = { dup ->
-                                    vm.onNewAchievement(dup)
-                                    selectedAchievement = dup
-                                    mode = HomeMode.DETAIL
-                                },
                             )
                         }
+                    HomeMode.SETTINGS ->
+                        SettingsScreenHost.Screen(
+                            vm = settingsVm,
+                            authVm = authVm,
+                            onBack = { mode = HomeMode.MAIN },
+                            onLogout = { settingsVm.logoutAndReturn(authVm) { mode = HomeMode.MAIN } },
+                            onAccountDeleted = { settingsVm.deleteAndReturn(authVm) { mode = HomeMode.MAIN } },
+                        )
                 }
             }
         }
@@ -157,9 +160,7 @@ private fun HomeScaffold(
     Scaffold(
         containerColor = Color(0xFF1C1C1E),
         bottomBar = {
-            if (showBottomBar) {
-                AppBottomNavigation(selectedIndex = selectedTab, onSelect = onTabChange)
-            }
+            /* bottom navigation commented out for this version – retained for future use */
         },
     ) { pv ->
         Box(Modifier.padding(pv)) { content() }

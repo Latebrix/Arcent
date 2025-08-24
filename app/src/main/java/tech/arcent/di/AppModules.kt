@@ -1,7 +1,7 @@
 package tech.arcent.di
 
 /*
- modules for wiring repos + auth.
+ modules for wiring repos + auth (duplication suffix provider disabled this version)
  */
 
 import android.content.Context

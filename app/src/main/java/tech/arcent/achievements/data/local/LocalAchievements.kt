@@ -1,7 +1,7 @@
 package tech.arcent.achievements.data.local
 
 /*
- local repo backed by Room
+ local repo backed by Room plus wipe helpers
  */
 
 import android.content.Context
@@ -62,6 +62,9 @@ internal interface AchievementDao {
         q: String,
         limit: Int,
     ): List<AchievementEntity>
+
+    @Query("DELETE FROM achievements")
+    suspend fun clearAll()
 }
 
 @Database(entities = [AchievementEntity::class], version = 1, exportSchema = false)
@@ -248,3 +251,8 @@ private fun AchievementEntity.toDomain(): AchievementDomain =
         categoriesCsv.csvToList(),
         tagsCsv.csvToList(),
     )
+
+suspend fun wipeLocalAchievements(context: Context) {
+    runCatching { AchievementsDb.get(context).dao().clearAll() }.onFailure { CrashReporting.capture(it) }
+    runCatching { File(context.filesDir, "achievements_photos").deleteRecursively() }.onFailure { CrashReporting.capture(it) }
+}

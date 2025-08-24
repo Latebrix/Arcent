@@ -10,6 +10,7 @@ import io.sentry.SentryLevel
 import io.sentry.android.core.SentryAndroid
 import kotlinx.coroutines.CoroutineExceptionHandler
 import tech.arcent.BuildConfig
+import tech.arcent.crash.CrashPrefs
 import tech.arcent.crash.CrashReporting
 import tech.arcent.crash.safeInstallDefaultHandler
 import javax.inject.Inject
@@ -25,8 +26,13 @@ class ArcentApp : Application() {
         installGlobalHandlers()
     }
 
-    /* only initialize sentry when enabled + dsn non blank else skip completely */
+    /* only initialize sentry when enabled + dsn non blank else skip completely (+ user preference) */
     private fun initSentryIfEnabled() {
+        val userOptIn = CrashPrefs.isEnabled(this, BuildConfig.DEBUG)
+        if (!userOptIn) {
+            CrashReporting.disable()
+            return
+        }
         val enabled = BuildConfig.SENTRY_ENABLED && BuildConfig.SENTRY_DSN.isNotBlank()
         if (enabled) {
             SentryAndroid.init(this) { opts ->
@@ -41,6 +47,7 @@ class ArcentApp : Application() {
                 opts.sessionReplay.onErrorSampleRate = 1.0
                 opts.sessionReplay.sessionSampleRate = if (BuildConfig.DEBUG) 1.0 else 0.1
             }
+            CrashReporting.enable()
         } else {
             CrashReporting.disable()
         }

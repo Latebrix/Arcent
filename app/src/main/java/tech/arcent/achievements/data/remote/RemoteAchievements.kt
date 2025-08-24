@@ -39,6 +39,20 @@ import java.util.Locale
 import java.util.TimeZone
 
 internal class RemoteAchievementRepository(private val context: Context, private val io: CoroutineDispatcher) : AchievementRepository {
+    /* reset recent cache so a new session gets fresh data */
+    fun resetCache() {
+        loadedRecent = false
+        recentFlowInternal.value = emptyList()
+        scope.launch {
+            try {
+                val page = loadPage(null, 5)
+                recentFlowInternal.value = page.data
+            } catch (e: Exception) {
+                CrashReporting.capture(e)
+            }
+        }
+    }
+
     private val TAG = "ArcentDebug"
 
     private fun client(): Client = AppwriteClientProvider.get(context)

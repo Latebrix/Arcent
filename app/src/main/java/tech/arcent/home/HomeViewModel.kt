@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import tech.arcent.achievements.data.repo.AchievementRepository
 import tech.arcent.achievements.data.repo.toUi
+import tech.arcent.session.SessionEvents
 import java.util.Calendar
 import javax.inject.Inject
 
@@ -37,6 +38,12 @@ class HomeViewModel
                 }
             }
             loadMoreInternal(reset = true)
+            viewModelScope.launch {
+                SessionEvents.authChanges.collect {
+                    _uiState.value = HomeUiState()
+                    loadMoreInternal(reset = true)
+                }
+            }
         }
 
         fun toggleAll() { _uiState.value = _uiState.value.copy(showingAll = !_uiState.value.showingAll) }

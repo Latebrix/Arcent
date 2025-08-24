@@ -7,12 +7,18 @@ package tech.arcent.auth
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.*
+import tech.arcent.BuildConfig
 import tech.arcent.auth.data.AuthRepository
-import tech.arcent.crash.CrashReporting
+import tech.arcent.auth.data.LocalUserStore
+import tech.arcent.auth.data.SessionManager
+import tech.arcent.auth.data.UserProfileStore
 import tech.arcent.crash.safeLaunch
+import tech.arcent.session.SessionEvents
 import javax.inject.Inject
 
 data class AuthUiState(
@@ -63,7 +69,28 @@ class AuthViewModel
                     AuthEvent.CheckSession -> checkSession(context ?: appContext)
                 }
             } catch (ex: Exception) {
-                CrashReporting.capture(ex)
+                tech.arcent.crash.CrashReporting.capture(ex)
+            }
+        }
+
+        /* logout clearing all cached user/session artifacts then updating state so root shows auth screen */
+        fun logout(context: Context) {
+            viewModelScope.safeLaunch {
+                try {
+                    runCatching {
+                        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestIdToken(BuildConfig.google_server_client_id).requestEmail().build()
+                        GoogleSignIn.getClient(context, gso).signOut()
+                    }
+                    runCatching { SessionManager.clear(context) }
+                    runCatching { UserProfileStore.clear(context) }
+                    runCatching { LocalUserStore.clearLocalUser(context) }
+                    tech.arcent.di.AchievementRepoCacheResetHolder.reset()
+                } catch (e: Exception) {
+                    tech.arcent.crash.CrashReporting.capture(e)
+                } finally {
+                    _uiState.update { it.copy(isAuthenticated = false, isChecking = false, isLoading = false) }
+                    SessionEvents.fireAuthChanged()
+                }
             }
         }
 
@@ -76,13 +103,18 @@ class AuthViewModel
             viewModelScope.safeLaunch {
                 try {
                     runCatching { tech.arcent.auth.data.LocalUserStore.saveLocalUserName(context, name) }
-                        .onSuccess { _uiState.update { it.copy(isAuthenticated = true, isLoading = false) } }
+                        .onSuccess {
+                            // persist profile so settings loads immediately without restart
+                            runCatching { UserProfileStore.saveProfile(context, name = name, avatarUrl = null, provider = "local") }
+                            _uiState.update { it.copy(isAuthenticated = true, isLoading = false) }
+                            SessionEvents.fireAuthChanged()
+                        }
                         .onFailure { ex ->
-                            CrashReporting.capture(ex)
+                            tech.arcent.crash.CrashReporting.capture(ex)
                             _uiState.update { it.copy(localNameError = ex.message ?: "Failed to save") }
                         }
                 } catch (e: Exception) {
-                    CrashReporting.capture(e)
+                    tech.arcent.crash.CrashReporting.capture(e)
                 }
             }
         }
@@ -97,16 +129,17 @@ class AuthViewModel
                     loading()
                     runCatching { repo.loginWithGoogle(context, idToken) }
                         .onSuccess {
-                            runCatching { repo.fetchAndCacheProfile(context) }
-                                .onFailure { CrashReporting.capture(it) }
+                            runCatching { repo.fetchAndCacheProfile(context) }.onFailure { tech.arcent.crash.CrashReporting.capture(it) }
+                            tech.arcent.di.AchievementRepoCacheResetHolder.reset()
                             _uiState.update { it.copy(isLoading = false, isAuthenticated = true, error = null, isChecking = false) }
+                            SessionEvents.fireAuthChanged()
                         }
                         .onFailure { ex ->
-                            CrashReporting.capture(ex)
+                            tech.arcent.crash.CrashReporting.capture(ex)
                             _uiState.update { it.copy(isLoading = false, error = ex.message, isChecking = false) }
                         }
                 } catch (e: Exception) {
-                    CrashReporting.capture(e)
+                    tech.arcent.crash.CrashReporting.capture(e)
                 }
             }
         }
@@ -122,17 +155,17 @@ class AuthViewModel
                 try {
                     val remoteHas =
                         runCatching { repo.hasActiveSession(context) }
-                            .onFailure { CrashReporting.capture(it) }
+                            .onFailure { tech.arcent.crash.CrashReporting.capture(it) }
                             .getOrElse { false }
-                    if (remoteHas) runCatching { repo.fetchAndCacheProfile(context) }.onFailure { CrashReporting.capture(it) }
+                    if (remoteHas) runCatching { repo.fetchAndCacheProfile(context) }.onFailure { tech.arcent.crash.CrashReporting.capture(it) }
                     val localProfile =
                         runCatching { tech.arcent.auth.data.UserProfileStore.load(context) }
-                            .onFailure { CrashReporting.capture(it) }
+                            .onFailure { tech.arcent.crash.CrashReporting.capture(it) }
                             .getOrNull()
                     val localHas = (localProfile?.provider == "local" && !localProfile.name.isNullOrBlank())
                     _uiState.update { it.copy(isAuthenticated = remoteHas || localHas || it.isAuthenticated, isChecking = false) }
                 } catch (e: Exception) {
-                    CrashReporting.capture(e)
+                    tech.arcent.crash.CrashReporting.capture(e)
                 }
             }
         }

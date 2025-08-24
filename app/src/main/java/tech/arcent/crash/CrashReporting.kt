@@ -27,6 +27,13 @@ object CrashReporting {
         enabled = false
     }
 
+    /* re enable capturing if user opted in again */
+    fun enable() {
+        enabled = true
+    }
+
+    fun isEnabled(): Boolean = enabled
+
     fun capture(t: Throwable) {
         try {
             if (enabled) {

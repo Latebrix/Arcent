@@ -12,12 +12,16 @@ import tech.arcent.achievements.data.repo.AchievementPhoto
 import tech.arcent.achievements.data.repo.AchievementRepository
 import tech.arcent.auth.data.UserProfileStore
 
+object AchievementRepoCacheResetHolder { private var resetter: (() -> Unit)? = null; internal fun register(r: RemoteAchievementRepository) { resetter = { r.resetCache() } }; fun reset() { resetter?.invoke() } }
+
 internal class DynamicAchievementRepository(
     private val context: Context,
     private val io: CoroutineDispatcher,
 ) : AchievementRepository {
     private val local by lazy { LocalAchievementRepository(context, io) }
-    private val remote by lazy { RemoteAchievementRepository(context, io) }
+    private val remote by lazy { RemoteAchievementRepository(context, io).also { AchievementRepoCacheResetHolder.register(it) } }
+
+    fun resetCaches() { runCatching { remote.resetCache() } }
 
     private fun active(): AchievementRepository {
         val profile = UserProfileStore.load(context)

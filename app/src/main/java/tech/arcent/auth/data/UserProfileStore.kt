@@ -49,6 +49,10 @@ object UserProfileStore {
         val provider = p.getString(KEY_PROVIDER, null) ?: return null
         return UserProfile(name, avatar, provider, p.getBoolean(KEY_FETCHED, false))
     }
+
+    fun clear(context: Context) {
+        prefs(context).edit().clear().apply()
+    }
 }
 
 data class UserProfile(

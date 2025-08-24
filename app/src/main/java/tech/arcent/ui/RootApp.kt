@@ -16,7 +16,7 @@ fun RootApp(externalVm: AuthViewModel? = null) {
     val state by vm.uiState.collectAsState()
 
     if (state.isAuthenticated) {
-        HomeScreen()
+        HomeScreen(authVm = vm)
     } else {
         AuthScreen(onAuthenticated = { /* recomposition triggers home */ }, vm = vm)
     }

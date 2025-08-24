@@ -113,4 +113,9 @@ internal object LocalUserStore {
         val entity = db.dao().getProfile() ?: return null
         return RoomFieldCrypto.dec(context, entity.nameEnc)
     }
+
+    suspend fun clearLocalUser(context: Context) {
+        val db = LocalUserRoomDb.get(context)
+        runCatching { db.dao().clear() }
+    }
 }

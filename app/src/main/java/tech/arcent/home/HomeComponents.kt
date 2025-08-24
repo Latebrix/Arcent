@@ -1,8 +1,13 @@
 package tech.arcent.home
 
+/*
+ home components list, top bar updated to support settings entry + reactive avatar
+ */
+
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.LocalOverscrollFactory
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -13,9 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,8 +31,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import tech.arcent.R
 import tech.arcent.auth.data.UserProfileStore
+import tech.arcent.profile.ProfileEvents
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -44,10 +49,11 @@ internal fun WinsContent(
     onOpenSearch: () -> Unit,
     onSearchQueryChange: (String) -> Unit,
     onOpenDetails: (Achievement) -> Unit,
+    onOpenSettings: () -> Unit,
 ) {
     val listState = rememberLazyListState()
     Column(Modifier.fillMaxSize()) {
-        TopBar(modifier = Modifier.padding(horizontal = 16.dp), onOpenSearch = onOpenSearch)
+        TopBar(modifier = Modifier.padding(horizontal = 16.dp), onOpenSearch = onOpenSearch, onOpenSettings = onOpenSettings)
         CompositionLocalProvider(LocalOverscrollFactory provides null) {
             LazyColumn(
                 state = listState,
@@ -118,10 +124,13 @@ private fun DateHeaderRow(dayStart: Long) {
 internal fun TopBar(
     modifier: Modifier = Modifier,
     onOpenSearch: () -> Unit,
+    onOpenSettings: () -> Unit,
 ) {
     val context = LocalContext.current
-    val profile = remember { UserProfileStore.load(context) }
+    val tick by ProfileEvents.ticks.collectAsState()
+    val profile = remember(tick) { UserProfileStore.load(context) }
     val nameInitial = profile?.name?.firstOrNull()?.uppercaseChar()?.toString() ?: "U"
+    val avatar = profile?.avatarPath
     Row(
         modifier =
             modifier
@@ -134,13 +143,22 @@ internal fun TopBar(
             color = Color(0xFF1E88E5),
             modifier = Modifier.size(40.dp),
         ) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(
-                    text = nameInitial,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
+            if (!avatar.isNullOrBlank()) {
+                AsyncImage(
+                    model = avatar,
+                    contentDescription = stringResource(id = R.string.cd_settings),
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
                 )
+            } else {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = nameInitial,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                    )
+                }
             }
         }
         Spacer(modifier = Modifier.weight(1f))
@@ -155,7 +173,7 @@ internal fun TopBar(
                 )
             }
         }
-        IconButton(onClick = { }) {
+        IconButton(onClick = { onOpenSettings() }) {
             Surface(color = actionBg, shape = CircleShape) {
                 Icon(
                     painter = painterResource(id = R.drawable.icons_settings),

@@ -1,10 +1,11 @@
 package tech.arcent.home.detail
 
 /*
-* Detail screen for viewing a single achievement: shows image, title, date,
-* optional category, tags, and markdown-formatted details with edit & delete actions.
-*/
+ * Detail screen for viewing a single achievement: shows image, title, date,
+ * optional category, tags, and markdown-formatted details with edit & delete actions. Share action replaces duplication this version.
+ */
 
+import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -22,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -30,9 +32,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.core.content.FileProvider
 import tech.arcent.R
 import tech.arcent.addachievement.markdown.buildStyledMarkdown
 import tech.arcent.home.Achievement
+import tech.arcent.share.ShareFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,19 +45,13 @@ fun WinDetailsRoute(
     onBack: () -> Unit,
     onEdit: (Achievement) -> Unit,
     onDeleted: (String) -> Unit,
-    onDuplicated: (Achievement) -> Unit,
     vm: WinDetailsViewModel = hiltViewModel(),
 ) {
     val state by vm.uiState.collectAsState()
     val snackbarHost = remember { SnackbarHostState() }
+    val ctx = LocalContext.current
     LaunchedEffect(achievement.id) { vm.setAchievement(achievement) }
     LaunchedEffect(Unit) { vm.deleted.collect { onDeleted(it) } }
-    LaunchedEffect(Unit) {
-        vm.duplicated.collect { dup ->
-            onDuplicated(dup)
-            snackbarHost.showSnackbar(message = "Duplicated: ${dup.title}")
-        }
-    }
     state.achievement?.let { a ->
         val accent = Color(0xFF799C92)
         val markdown = remember(a.details) { a.details?.let { buildStyledMarkdown(it, accent) } }
@@ -61,11 +59,27 @@ fun WinDetailsRoute(
             achievement = a,
             markdown = markdown,
             isDeleting = state.isDeleting,
-            isDuplicating = state.isDuplicating,
             onBack = onBack,
             onEdit = { onEdit(a) },
             onDeleteRequest = { vm.requestDelete() },
-            onDuplicate = { vm.duplicateCurrent() },
+            onShare = { ach ->
+                val shareData = ShareFormatter.formatText(ach)
+                val intent = Intent(Intent.ACTION_SEND)
+                var hasImage = false
+                if (!ach.photoUrl.isNullOrBlank()) {
+                    val file = ShareFormatter.prepareImageFile(ctx, ach.photoUrl!!)
+                    if (file != null) {
+                        val uri = FileProvider.getUriForFile(ctx, ctx.packageName + ".fileprovider", file)
+                        intent.putExtra(Intent.EXTRA_STREAM, uri)
+                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        intent.type = "image/*"
+                        hasImage = true
+                    }
+                }
+                if (!hasImage) intent.type = "text/plain"
+                intent.putExtra(Intent.EXTRA_TEXT, shareData)
+                runCatching { ctx.startActivity(Intent.createChooser(intent, ctx.getString(R.string.win_details_share))) }
+            },
             snackbarHost = snackbarHost,
         )
     }
@@ -77,11 +91,10 @@ private fun WinDetailsScreen(
     achievement: Achievement,
     markdown: AnnotatedString?,
     isDeleting: Boolean,
-    isDuplicating: Boolean,
     onBack: () -> Unit,
     onEdit: () -> Unit,
     onDeleteRequest: () -> Unit,
-    onDuplicate: () -> Unit,
+    onShare: (Achievement) -> Unit,
     snackbarHost: SnackbarHostState,
 ) {
     val accent = Color(0xFF799C92)
@@ -100,15 +113,9 @@ private fun WinDetailsScreen(
             TopAppBar(
                 title = { Text(stringResource(id = R.string.win_details_title)) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(id = R.string.cd_back), tint = Color.White)
-                    }
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(id = R.string.cd_back), tint = Color.White) }
                 },
-                actions = {
-                    IconButton(onClick = { showActions = true }) {
-                        Icon(Icons.Filled.MoreVert, contentDescription = null, tint = Color.White)
-                    }
-                },
+                actions = { IconButton(onClick = { showActions = true }) { Icon(Icons.Filled.MoreVert, contentDescription = null, tint = Color.White) } },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF1C1C1E), titleContentColor = Color.White, navigationIconContentColor = Color.White, actionIconContentColor = Color.White),
                 windowInsets = WindowInsets(0),
             )
@@ -134,10 +141,7 @@ private fun WinDetailsScreen(
                     AchievementImage(photoUrl = achievement.photoUrl, title = achievement.title)
                     if (showMetaBox) {
                         Spacer(Modifier.height(20.dp))
-                        MetaBox(
-                            category = if (hasCategory) category else null,
-                            tags = if (hasTags) achievement.tags else emptyList(),
-                        )
+                        MetaBox(category = if (hasCategory) category else null, tags = if (hasTags) achievement.tags else emptyList())
                     }
                     if (hasDetails && markdown != null) {
                         Spacer(Modifier.height(20.dp))
@@ -147,14 +151,9 @@ private fun WinDetailsScreen(
                     EditButton(onEdit = onEdit)
                     Spacer(Modifier.height(48.dp))
                 }
-                if (isDeleting || isDuplicating) {
-                    val msg = if (isDeleting) stringResource(id = R.string.win_details_deleting) else stringResource(id = R.string.win_details_duplicating)
-                    Box(
-                        Modifier
-                            .fillMaxSize()
-                            .background(Color(0x88000000)),
-                        contentAlignment = Alignment.Center,
-                    ) {
+                if (isDeleting) {
+                    val msg = stringResource(id = R.string.win_details_deleting)
+                    Box(Modifier.fillMaxSize().background(Color(0x88000000)), contentAlignment = Alignment.Center) {
                         Surface(shape = RoundedCornerShape(14.dp), color = Color(0xFF2C2C2E)) {
                             Row(Modifier.padding(horizontal = 28.dp, vertical = 22.dp), verticalAlignment = Alignment.CenterVertically) {
                                 CircularProgressIndicator(modifier = Modifier.size(26.dp), strokeWidth = 3.dp, color = accent)
@@ -171,24 +170,12 @@ private fun WinDetailsScreen(
     if (showActions) {
         ActionSheet(
             onDismiss = { showActions = false },
-            onDelete = {
-                showActions = false
-                showDeleteConfirm = true
-            },
-            onDuplicate = {
-                showActions = false
-                onDuplicate()
-            },
+            onDelete = { showActions = false; showDeleteConfirm = true },
+            onShare = { showActions = false; onShare(achievement) },
         )
     }
     if (showDeleteConfirm) {
-        DeleteConfirmDialog(
-            onDismiss = { showDeleteConfirm = false },
-            onConfirm = {
-                showDeleteConfirm = false
-                onDeleteRequest()
-            },
-        )
+        DeleteConfirmDialog(onDismiss = { showDeleteConfirm = false }, onConfirm = { showDeleteConfirm = false; onDeleteRequest() })
     }
 }
 
@@ -337,31 +324,16 @@ private fun EditButton(onEdit: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ActionSheet(onDismiss: () -> Unit, onDelete: () -> Unit, onDuplicate: () -> Unit) {
+private fun ActionSheet(onDismiss: () -> Unit, onDelete: () -> Unit, onShare: () -> Unit) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         containerColor = Color(0xFF2E2E2E),
         dragHandle = null,
         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
     ) {
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .padding(start = 24.dp, end = 24.dp, top = 40.dp, bottom = 40.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
-        ) {
-            Button(
-                onClick = onDuplicate,
-                modifier = Modifier.fillMaxWidth().height(54.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6B8D7D)),
-                shape = RoundedCornerShape(16.dp),
-            ) { Text(stringResource(id = R.string.win_details_duplicate), color = Color.White, fontSize = 16.sp) }
-            Button(
-                onClick = onDelete,
-                modifier = Modifier.fillMaxWidth().height(54.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF9A3A42)),
-                shape = RoundedCornerShape(16.dp),
-            ) { Text(stringResource(id = R.string.win_details_delete), color = Color.White, fontSize = 16.sp) }
+        Column(Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, top = 40.dp, bottom = 40.dp), verticalArrangement = Arrangement.spacedBy(24.dp)) {
+            Button(onClick = onShare, modifier = Modifier.fillMaxWidth().height(54.dp), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6B8D7D)), shape = RoundedCornerShape(16.dp)) { Text(stringResource(id = R.string.win_details_share), color = Color.White, fontSize = 16.sp) }
+            Button(onClick = onDelete, modifier = Modifier.fillMaxWidth().height(54.dp), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF9A3A42)), shape = RoundedCornerShape(16.dp)) { Text(stringResource(id = R.string.win_details_delete), color = Color.White, fontSize = 16.sp) }
         }
     }
 }
