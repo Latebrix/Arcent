@@ -32,13 +32,13 @@ Whether it's completing a workout, learning something new, finishing a project, 
   <img src="./screenshots/f34ab7e6-e15f-49de-b34b-59317ef50716.jpg" width="200" />
 </p>
 
-## 📱 Features
+## Arcent Features
 
 ### ✅ Available (DONE)
 - **Beautiful Home Screen** - View your recent achievements at a glance
 - **Rich Achievement Editor** - Add detailed descriptions with Markdown support and photos
 - **Smart Organization** - Categories (Health, Learning, Productivity, Wellness, Personal) and custom tags
-- **Powerful Search** - Find any achievement instantly across titles, details, and tags
+- **Powerful Search** - Find any achievement instantly across titles and details.
 - **Different Storage Types** - Local storage or Cloud DB.
 - **Photo Attachments** - Capture or add photos to document your wins
 
@@ -49,7 +49,7 @@ Whether it's completing a workout, learning something new, finishing a project, 
 - **Data Export** - Backup your achievements in multiple formats
 - **AI Suggestions** - Smart recommendations for documenting wins
 
-## 🎯 Why Track Achievements?
+## Why Track Achievements?
 
 - **Build Confidence** - See proof of your capabilities
 - **Create Momentum** - Small wins lead to bigger victories
