@@ -24,13 +24,14 @@ android {
     sentry {
         org = secretsProps.getProperty("SENTRY_ORG")
         projectName = secretsProps.getProperty("SENTRY_PROJECT")
+        uploadNativeSymbols = true
     }
 
     defaultConfig {
         applicationId = "tech.arcent"
         minSdk = 24
         targetSdk = 36
-        versionCode = 2
+        versionCode = 3
         versionName = "1.10 Beta"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
