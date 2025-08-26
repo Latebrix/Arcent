@@ -18,6 +18,7 @@ import tech.arcent.core.dispatchers.AppDispatchers
 import tech.arcent.session.SessionEvents
 import java.util.Calendar
 import javax.inject.Inject
+import kotlinx.coroutines.Job
 
 @OptIn(FlowPreview::class)
 @HiltViewModel
@@ -35,18 +36,15 @@ class HomeViewModel
         private val recentLimit = 5
         private val searchQueryFlow = MutableStateFlow("")
         private val searchDebounceMs = 350L
+        private var recentJob: Job? = null
 
         init {
-            viewModelScope.launch {
-                repo.recentFlow(recentLimit).collect { list ->
-                    val ui = list.map { it.toUi() }
-                    _uiState.value = _uiState.value.copy(achievements = ui, totalWins = ui.size)
-                }
-            }
+            startRecentCollection()
             loadMoreInternal(reset = true)
             viewModelScope.launch {
                 SessionEvents.authChanges.collect {
                     _uiState.value = HomeUiState()
+                    startRecentCollection()
                     loadMoreInternal(reset = true)
                 }
             }
@@ -74,6 +72,17 @@ class HomeViewModel
                         }
                         _uiState.value = _uiState.value.copy(searchResults = results, searchLoading = false)
                     }
+            }
+        }
+
+        /* start or restart recent achievements collection */
+        private fun startRecentCollection() {
+            recentJob?.cancel()
+            recentJob = viewModelScope.launch {
+                repo.recentFlow(recentLimit).collect { list ->
+                    val ui = list.map { it.toUi() }
+                    _uiState.value = _uiState.value.copy(achievements = ui, totalWins = ui.size)
+                }
             }
         }
 

@@ -13,7 +13,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import tech.arcent.addachievement.AddAchievementScreen
 import tech.arcent.addachievement.AddAchievementViewModel
 import tech.arcent.auth.AuthViewModel
@@ -23,6 +22,8 @@ import tech.arcent.home.simple.SimpleSearchScreen
 import tech.arcent.settings.SettingsScreenHost
 import tech.arcent.settings.SettingsViewModel
 import tech.arcent.stats.StatsScreen
+import tech.arcent.ui.LocalSystemBarController
+import tech.arcent.ui.SystemBarStyle
 
 private enum class HomeMode { MAIN, ADD, ALL, SEARCH, DETAIL, SETTINGS }
 
@@ -30,18 +31,19 @@ private enum class HomeMode { MAIN, ADD, ALL, SEARCH, DETAIL, SETTINGS }
 @Composable
 fun HomeScreen(vm: HomeViewModel = hiltViewModel(), authVm: AuthViewModel = hiltViewModel()) {
     val state by vm.uiState.collectAsState()
-    val systemUi = rememberSystemUiController()
     var mode by remember { mutableStateOf(HomeMode.MAIN) }
     var selectedTab by remember { mutableStateOf(0) }
     var selectedAchievement by remember { mutableStateOf<Achievement?>(null) }
     val addVm: AddAchievementViewModel = hiltViewModel()
     val settingsVm: SettingsViewModel = hiltViewModel()
+    val barController = LocalSystemBarController.current
+    val baseColor = Color(0xFF1C1C1E)
+    val addColor = Color(0xFF252525)
 
+    /* reactive fallback update */
     LaunchedEffect(mode, selectedTab) {
-        /* adjusted system nav color for layout without app bottom nav */
-        val navColor = Color(0xFF1C1C1E)
-        systemUi.setStatusBarColor(Color(0xFF1C1C1E), false)
-        systemUi.setNavigationBarColor(navColor, false)
+        val color = if (mode == HomeMode.ADD) addColor else baseColor
+        barController.set(SystemBarStyle(color, color, false))
     }
 
     BackHandler(enabled = true) {
@@ -56,7 +58,7 @@ fun HomeScreen(vm: HomeViewModel = hiltViewModel(), authVm: AuthViewModel = hilt
     HomeScaffold(selectedTab = selectedTab, onTabChange = { idx ->
         selectedTab = idx
         if (idx == 0 && mode !in listOf(HomeMode.DETAIL, HomeMode.ADD, HomeMode.SETTINGS)) mode = HomeMode.MAIN
-    }, showBottomBar = false /* bottom nav disabled this release */) {
+    }, showBottomBar = false) {
         if (selectedTab == 1) {
             StatsScreen()
         } else {
@@ -76,7 +78,11 @@ fun HomeScreen(vm: HomeViewModel = hiltViewModel(), authVm: AuthViewModel = hilt
                     HomeMode.MAIN ->
                         WinsContent(
                             state = state,
-                            onAddNew = { addVm.startNew(); mode = HomeMode.ADD },
+                            onAddNew = {
+                                addVm.startNew()
+                                barController.set(SystemBarStyle(addColor, addColor, false))
+                                mode = HomeMode.ADD
+                            },
                             onToggleAll = { mode = HomeMode.ALL },
                             onLoadMore = { vm.loadMore() },
                             onOpenSearch = { mode = HomeMode.SEARCH },
@@ -89,21 +95,19 @@ fun HomeScreen(vm: HomeViewModel = hiltViewModel(), authVm: AuthViewModel = hilt
                             vm = addVm,
                             onBack = {
                                 addVm.startNew()
-                                if (addVm.uiState.value.editingId != null && selectedAchievement != null) {
-                                    mode = HomeMode.DETAIL
-                                } else {
-                                    mode = HomeMode.MAIN
-                                }
+                                val returningToDetail = addVm.uiState.value.editingId != null && selectedAchievement != null
+                                val targetMode = if (returningToDetail) HomeMode.DETAIL else HomeMode.MAIN
+                                if (targetMode != HomeMode.ADD) barController.set(SystemBarStyle(baseColor, baseColor, false))
+                                mode = targetMode
                             },
                             onSaved = { a ->
                                 vm.onNewAchievement(a)
                                 addVm.startNew()
-                                if (selectedAchievement?.id == a.id) {
-                                    selectedAchievement = a
-                                    mode = HomeMode.DETAIL
-                                } else {
-                                    mode = HomeMode.MAIN
-                                }
+                                val returningToDetail = selectedAchievement?.id == a.id
+                                val targetMode = if (returningToDetail) HomeMode.DETAIL else HomeMode.MAIN
+                                if (targetMode != HomeMode.ADD) barController.set(SystemBarStyle(baseColor, baseColor, false))
+                                if (returningToDetail) selectedAchievement = a
+                                mode = targetMode
                             },
                         )
                     HomeMode.ALL ->
@@ -127,6 +131,7 @@ fun HomeScreen(vm: HomeViewModel = hiltViewModel(), authVm: AuthViewModel = hilt
                                 onBack = { mode = HomeMode.MAIN; selectedAchievement = null },
                                 onEdit = { editA ->
                                     addVm.startEditing(editA)
+                                    barController.set(SystemBarStyle(addColor, addColor, false))
                                     mode = HomeMode.ADD
                                 },
                                 onDeleted = { id ->
@@ -160,7 +165,6 @@ private fun HomeScaffold(
     Scaffold(
         containerColor = Color(0xFF1C1C1E),
         bottomBar = {
-            /* bottom navigation commented out for this version – retained for future use */
         },
     ) { pv ->
         Box(Modifier.padding(pv)) { content() }

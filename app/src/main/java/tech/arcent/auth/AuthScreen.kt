@@ -34,7 +34,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
@@ -56,14 +55,6 @@ fun AuthScreen(
         // Exit after notifying parent
         LaunchedEffect(Unit) { onAuthenticated() }
         return
-    }
-
-    // Style system bars
-    val systemUiController = rememberSystemUiController()
-    DisposableEffect(systemUiController) {
-        systemUiController.setStatusBarColor(Color.Transparent, darkIcons = false)
-        systemUiController.setNavigationBarColor(Color.Transparent, darkIcons = false)
-        onDispose { }
     }
 
     // Google sign-in configuration

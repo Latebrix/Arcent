@@ -31,9 +31,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import tech.arcent.R
 import tech.arcent.addachievement.markdown.MarkdownEditor
+import tech.arcent.ui.LocalSystemBarController
+import tech.arcent.ui.SystemBarStyle
 import java.text.DateFormat
 import java.util.Calendar
 
@@ -53,12 +54,9 @@ fun AddAchievementScreen(
 ) {
     val state by vm.uiState.collectAsState()
     val accent = Color(0xFF799c92)
-    val systemUi = rememberSystemUiController()
-    var initialized by remember { mutableStateOf(false) }
+    val barController = LocalSystemBarController.current
     LaunchedEffect(Unit) {
-        systemUi.setStatusBarColor(darkBackground, darkIcons = false)
-        systemUi.setNavigationBarColor(darkBackground, darkIcons = false)
-        if (!initialized) initialized = true
+        barController.set(SystemBarStyle(darkBackground, darkBackground, false))
         vm.saved.collect { achievement ->
             onSaved(achievement)
             onBack()
@@ -133,6 +131,7 @@ fun AddAchievementScreen(
     AddAchievementOverlays(state = state, vm = vm)
 }
 
+/* Top app bar */
 @Composable
 private fun AddAchievementTopBar(
     accent: Color,
