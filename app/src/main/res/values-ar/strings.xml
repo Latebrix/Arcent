@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Arcent</string>
+    <!-- Retained title -->
+    <string name="title_celebrate">احتفل بكل إنجاز ✦</string>
+    <!-- New primary action text -->
+    <string name="action_sign_with_google">تسجيل باستخدام Google</string>
+    <!-- Local provider text updated to Room -->
+    <string name="provider_sqlite_local">محليًا باستخدام Room</string>
+    <!-- Terms -->
+    <string name="terms_prefix">بالمتابعة فإنك توافق على </string>
+    <string name="terms_service">شروط الخدمة</string>
+    <string name="privacy_policy">سياسة الخصوصية</string>
+    <!-- Home Screen -->
+    <string name="home_recent_achievements">الإنجازات الأخيرة</string>
+    <string name="home_action_add_new_achievement">إضافة إنجاز جديد</string>
+    <string name="home_first_win_title">احتفل بإنجازك الأول</string>
+    <string name="home_first_win_subtitle">أضف إنجازًا لبدء بناء زخمك.</string>
+    <string name="nav_wins">الإنجازات</string>
+    <string name="nav_stats">الإحصائيات</string>
+    <!-- Content descriptions -->
+    <string name="cd_search">بحث</string>
+    <string name="cd_settings">الإعدادات</string>
+    <string name="cd_featured_win">صورة الإنجاز المميز</string>
+    <string name="cd_add">إضافة</string>
+    <string name="cd_details">تفاصيل</string>
+    <!-- Local mode info -->
+    <string name="local_mode_info">تستضيف بنفسك؛ جميع بياناتك ستُحفظ محليًا.</string>
+    <!-- New strings for name input -->
+    <string name="label_your_name">اسمك</string>
+    <string name="placeholder_enter_your_name">أدخل اسمك</string>
+    <!-- Continue button -->
+    <string name="button_continue">متابعة</string>
+    <!-- Add Achievement Screen -->
+    <string name="add_title_screen">إنجاز جديد</string>
+    <string name="add_back">رجوع</string>
+    <string name="add_tips">نصائح</string>
+    <string name="add_field_title_label">العنوان</string>
+    <string name="add_field_title_placeholder">مثال: إكمال سباق 5K</string>
+    <string name="add_field_details_label">التفاصيل (اختياري)</string>
+    <string name="add_field_details_placeholder">كيف حققت هذا؟ ملاحظات تريد تذكرها.</string>
+    <string name="add_category">الفئة</string>
+    <string name="add_tags">الوسوم</string>
+    <string name="add_date">التاريخ</string>
+    <string name="add_time">الوقت</string>
+    <string name="add_add_photo_optional">إضافة صورة (اختياري)</string>
+    <string name="add_add_image">إضافة صورة</string>
+    <string name="add_save">حفظ الإنجاز</string>
+    <string name="cd_back">رجوع</string>
+    <string name="cd_add_image">إضافة صورة</string>
+    <!-- Categories -->
+    <string name="cat_health">الصحة</string>
+    <string name="cat_learning">التعلم</string>
+    <string name="cat_productivity">الإنتاجية</string>
+    <string name="cat_wellness">العافية</string>
+    <string name="cat_personal">شخصي</string>
+    <!-- Tags -->
+    <string name="tag_milestone">محطة مهمة</string>
+    <string name="tag_habit">عادة</string>
+    <string name="tag_pr">رقم شخصي</string>
+    <string name="tag_fitness">لياقة</string>
+    <string name="tag_mindset">عقلية</string>
+    <string name="tag_career">مسار مهني</string>
+    <!-- Tips Sheet -->
+    <string name="tips_title">نصائح الإنجاز</string>
+    <string name="tip_1">كن محددًا بشأن ما أنجزته.</string>
+    <string name="tip_2">أضف السياق: لماذا هذا مهم؟</string>
+    <string name="tip_3">استخدم الوسوم لتتبع الأنماط.</string>
+    <string name="tip_4">الإنجازات الصغيرة المتكررة تبني الزخم.</string>
+    <string name="tip_5">أضف صورة إذا ساعدتك على التذكر.</string>
+    <string name="add_ok">موافق</string>
+    <string name="add_cancel">إلغاء</string>
+    <string name="add_hour_label">ساعة</string>
+    <string name="add_min_label">دقيقة</string>
+    <string name="add_add_mine">أضف إنجازي!</string>
+    <string name="add_category_add">إضافة فئة</string>
+    <string name="add_tag_add">إضافة وسم</string>
+    <string name="add_new_category_dialog_title">فئة جديدة</string>
+    <string name="add_new_tag_dialog_title">وسم جديد</string>
+    <string name="add_input_hint_category">اسم الفئة</string>
+    <string name="add_input_hint_tag">اسم الوسم</string>
+    <string name="add_error_too_long">طويل جدًا</string>
+    <string name="add_markdown_bold">عريض</string>
+    <string name="add_markdown_italic">مائل</string>
+    <string name="add_markdown_bullet">• قائمة</string>
+    <string name="add_markdown_numbered">1. قائمة</string>
+    <string name="add_markdown_preview">معاينة</string>
+    <!-- Markdown improved labels -->
+    <string name="add_markdown_heading1">عنوان 1</string>
+    <string name="add_markdown_heading2">عنوان 2</string>
+    <string name="add_markdown_quote">اقتباس</string>
+    <string name="add_markdown_bullet_label">نقاط</string>
+    <string name="add_markdown_numbered_label">مرقمة</string>
+    <string name="add_clear">مسح</string>
+    <string name="cd_clear">مسح المحتوى</string>
+    <string name="add_plus">+</string>
+    <string name="add_copy">نسخ</string>
+    <string name="add_paste">لصق</string>
+    <string name="add_cut">قص</string>
+    <string name="add_select_all">تحديد الكل</string>
+    <string name="home_all">الكل</string>
+    <string name="cd_all">جميع الإنجازات</string>
+    <string name="home_load_more">تحميل المزيد</string>
+    <string name="search_title">بحث عن الإنجازات</string>
+    <string name="search_close">إغلاق</string>
+    <string name="search_placeholder">اكتب للبحث...</string>
+    <string name="search_no_results">لا توجد نتائج</string>
+    <string name="add_saving">جارٍ الحفظ...</string>
+    <string name="home_empty_recent">لا توجد إنجازات بعد. أضف إنجازك الأول!</string>
+    <string name="all_empty">لا توجد إنجازات للعرض.</string>
+    <string name="search_title_bar">بحث</string>
+    <string name="search_hint_inline">ابحث في إنجازاتك...</string>
+    <string name="stats_placeholder">الإحصائيات قادمة قريبًا</string>
+    <string name="sentry_test_crash">اختبار تعطل Sentry</string>
+    <string name="sentry_test_nonfatal">اختبار غير قاتل</string>
+    <string name="sentry_test_nonfatal_event">حدث اختبار غير قاتل من شاشة الإحصائيات</string>
+    <string name="stats_counter">العداد: %1$d</string>
+    <string name="stats_increment">زيادة العداد</string>
+    <!-- Win Details Screen -->
+    <string name="win_details_title">تفاصيل الإنجاز</string>
+    <string name="win_details_category">الفئة</string>
+    <string name="win_details_tags">الوسوم</string>
+    <string name="win_details_details">التفاصيل</string>
+    <string name="win_details_edit">تعديل</string>
+    <string name="win_details_delete">حذف الإنجاز</string>
+    <string name="win_details_delete_confirm">حذف</string>
+    <string name="win_details_delete_cancel">إلغاء</string>
+    <string name="win_details_delete_sheet_title">إجراءات</string>
+    <string name="win_details_deleting">جارٍ الحذف…</string>
+    <string name="win_details_today">اليوم</string>
+    <string name="win_details_yesterday">أمس</string>
+    <string name="add_update">حفظ التغييرات</string>
+    <string name="win_details_duplicate">تكرار الإنجاز</string>
+    <string name="win_details_duplicating">جارٍ التكرار…</string>
+    <string name="win_details_share">مشاركة الإنجاز</string>
+    <!-- Settings Screen -->
+    <string name="settings_title">الإعدادات</string>
+    <string name="settings_section_account">الحساب</string>
+    <string name="settings_account_actions">إجراءات الحساب</string>
+    <string name="settings_change_avatar">تغيير الصورة الرمزية</string>
+    <string name="settings_logout">تسجيل الخروج</string>
+    <string name="settings_delete_account">حذف الحساب</string>
+    <string name="settings_delete_account_and_data">حذف الحساب والبيانات</string>
+    <string name="settings_delete_confirm_title">حذف الحساب</string>
+    <string name="settings_delete_confirm_message">سيؤدي هذا إلى إزالة بياناتك المحلية. قد تبقى الوسائط المخزنة عن بُعد. هل تريد المتابعة؟</string>
+    <string name="settings_delete_confirm_yes">حذف</string>
+    <string name="settings_delete_confirm_no">إلغاء</string>
+    <string name="settings_crash_reporting">تقرير الأعطال</string>
+    <string name="settings_crash_reporting_desc_debug">إرسال تقارير الأعطال والأخطاء</string>
+    <string name="settings_crash_reporting_desc">إرسال تقارير الأعطال والأخطاء</string>
+    <string name="settings_app_version_label">إصدار التطبيق</string>
+    <string name="settings_more">المزيد</string>
+    <string name="settings_avatar_picker_title">اختر صورة</string>
+    <string name="settings_logout_success">تم تسجيل الخروج</string>
+    <string name="settings_delete_success">تم حذف الحساب</string>
+    <string name="settings_action_back">رجوع</string>
+    <string name="settings_name_label">الاسم المعروض</string>
+    <string name="settings_name_placeholder">أدخل اسمًا جديدًا</string>
+    <string name="settings_name_save">حفظ الاسم</string>
+    <string name="settings_name_error_short">الاسم قصير جدًا</string>
+    <string name="settings_name_error_too_long">الاسم طويل جدًا (الحد الأقصى 75)</string>
+    <string name="settings_avatar_error_too_large">الصورة كبيرة جدًا (الحد الأقصى 45MB)</string>
+    <string name="settings_duplication_prefix_label">لاحقة التكرار</string>
+    <string name="settings_duplication_prefix_placeholder">مثال: (✦ +1)</string>
+    <string name="settings_duplication_prefix_save">حفظ اللاحقة</string>
+    <string name="settings_repo">مستودع المشروع</string>
+    <string name="settings_repo_open">فتح المستودع</string>
+    <string name="settings_provider_local_note">الوضع المحلي (Room) – حذف الحساب / تسجيل الخروج غير متاح.</string>
+    <string name="settings_delete_message_local">هل تريد حذف جميع البيانات المحلية الآن؟</string>
+    <string name="settings_delete_message_remote">حذف الحساب والإنجازات فورًا. الصور المرفوعة سيتم مسحها تلقائيًا خلال 14 يومًا. متابعة؟</string>
+    <string name="settings_snackbar_name_saved">تم تحديث الاسم</string>
+    <string name="settings_snackbar_avatar_saved">تم تحديث الصورة الرمزية</string>
+    <string name="settings_snackbar_suffix_saved">تم تحديث اللاحقة</string>
+    <string name="settings_error_avatar_size">الصورة كبيرة جدًا (الحد الأقصى 45MB)</string>
+    <string name="settings_error_name_save">فشل حفظ الاسم</string>
+    <string name="settings_error_generic">فشلت العملية</string>
+    <string name="settings_name_updated">تم تحديث الاسم</string>
+    <string name="settings_avatar_updated">تم تحديث الصورة الرمزية</string>
+    <string name="settings_duplication_suffix_updated">تم تحديث اللاحقة</string>
+    <string name="settings_delete_local_data">حذف البيانات المحلية</string>
+    <string name="settings_duplication_suffix_error_empty">لا يمكن أن تكون اللاحقة فارغة</string>
+    <string name="settings_repo_url">https://github.com/Latebrix/Arcent</string>
+    <string name="settings_debug_build_note">هذا إصدار تجريبي (Debug)</string>
+    <string name="settings_build_type_note">هذا إصدار %1$s</string>
+    <string name="settings_build_type_debug_word">تجريبي</string>
+    <string name="settings_build_type_release_word">رسمي</string>
+</resources>
