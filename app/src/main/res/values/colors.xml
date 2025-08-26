@@ -4,4 +4,5 @@
     <color name="white">#FFFFFFFF</color>
     <!-- Primary brand color -->
     <color name="arcent_primary">#799C92</color>
+    <color name="arcent_primary_splash">#789d93</color>
 </resources>

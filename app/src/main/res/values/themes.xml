@@ -8,11 +8,11 @@
 
     <!-- Dedicated Splash theme used only at launch. System SplashScreen API reads these attributes. -->
     <style name="Theme.Arcent.Splash" parent="Theme.AppCompat.NoActionBar">
-        <item name="android:windowBackground">@drawable/ic_splash</item>
+        <item name="android:windowBackground">@drawable/arcent_logo_noback</item>
         <item name="android:windowTranslucentStatus">true</item>
         <item name="android:windowTranslucentNavigation">true</item>
-        <item name="windowSplashScreenBackground">@color/arcent_primary</item>
-        <item name="windowSplashScreenIconBackgroundColor">@color/arcent_primary</item>
+        <item name="windowSplashScreenBackground">@color/arcent_primary_splash</item>
+        <item name="windowSplashScreenIconBackgroundColor">@android:color/transparent</item>
 
     </style>
 
@@ -20,9 +20,9 @@
     <style
         name="Theme.App.Starting"
         parent="Theme.SplashScreen.IconBackground">
-        <item name="windowSplashScreenBackground">@color/arcent_primary</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash</item>
-        <item name="windowSplashScreenIconBackgroundColor">@color/arcent_primary</item>
+        <item name="windowSplashScreenBackground">@color/arcent_primary_splash</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/arcent_logo_noback</item>
+        <item name="windowSplashScreenIconBackgroundColor">@android:color/transparent</item>
         <item name="postSplashScreenTheme">@style/Theme.Arcent</item>
     </style>
 </resources>

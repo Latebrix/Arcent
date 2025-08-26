@@ -2,33 +2,39 @@ package tech.arcent.home
 
 /*
  ViewModel for home screen: manages recent wins, paging, search,  detail updates/deletes.
- */
+*/
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import tech.arcent.achievements.data.repo.AchievementRepository
 import tech.arcent.achievements.data.repo.toUi
+import tech.arcent.core.dispatchers.AppDispatchers
 import tech.arcent.session.SessionEvents
 import java.util.Calendar
 import javax.inject.Inject
 
+@OptIn(FlowPreview::class)
 @HiltViewModel
 class HomeViewModel
     @Inject
     constructor(
         private val repo: AchievementRepository,
+        private val dispatchers: AppDispatchers,
     ) : ViewModel() {
+        companion object {
+            internal var OVERRIDE_DEBOUNCE_MS: Long? = null
+        }
         private val _uiState = MutableStateFlow(HomeUiState())
         val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
         private val recentLimit = 5
-        private var searchJob: Job? = null
+        private val searchQueryFlow = MutableStateFlow("")
+        private val searchDebounceMs = 350L
 
         init {
             viewModelScope.launch {
@@ -43,6 +49,31 @@ class HomeViewModel
                     _uiState.value = HomeUiState()
                     loadMoreInternal(reset = true)
                 }
+            }
+            viewModelScope.launch {
+                searchQueryFlow
+                    .debounce(OVERRIDE_DEBOUNCE_MS ?: searchDebounceMs)
+                    .distinctUntilChanged()
+                    .collectLatest { qRaw ->
+                        val q = qRaw.trim()
+                        if (q.isBlank()) {
+                            _uiState.value = _uiState.value.copy(searchResults = emptyList(), searchLoading = false)
+                            return@collectLatest
+                        }
+                        _uiState.value = _uiState.value.copy(searchLoading = true)
+                        /* avoid starting first heavy search while initial paging still loading to prevent first-run lag */
+                        if (_uiState.value.loadingMore) {
+                            uiState.filter { !it.loadingMore }.first()
+                        }
+                        val results = try {
+                            withContext(dispatchers.io) { repo.search(q).map { it.toUi() } }
+                        } catch (ce: CancellationException) {
+                            throw ce
+                        } catch (_: Exception) {
+                            emptyList()
+                        }
+                        _uiState.value = _uiState.value.copy(searchResults = results, searchLoading = false)
+                    }
             }
         }
 
@@ -85,29 +116,12 @@ class HomeViewModel
             return cal.timeInMillis
         }
 
-        // Search
-        fun openSearch() { _uiState.value = _uiState.value.copy(searching = true, searchQuery = "", searchResults = emptyList(), searchLoading = false) }
+        /* Search control functions */
+        fun openSearch() { _uiState.value = _uiState.value.copy(searching = true, searchQuery = "", searchResults = emptyList(), searchLoading = false); searchQueryFlow.value = "" }
 
-        fun closeSearch() { _uiState.value = _uiState.value.copy(searching = false, searchQuery = "", searchResults = emptyList(), searchLoading = false) }
+        fun closeSearch() { _uiState.value = _uiState.value.copy(searching = false, searchQuery = "", searchResults = emptyList(), searchLoading = false); searchQueryFlow.value = "" }
 
-        fun onSearchQueryChange(q: String) { _uiState.value = _uiState.value.copy(searchQuery = q); triggerSearchDebounced() }
-
-        private fun triggerSearchDebounced() {
-            searchJob?.cancel()
-            val snapshot = _uiState.value.searchQuery
-            searchJob =
-                viewModelScope.launch {
-                    val q = snapshot.trim()
-                    if (q.isBlank()) {
-                        _uiState.value = _uiState.value.copy(searchResults = emptyList(), searchLoading = false)
-                        return@launch
-                    }
-                    _uiState.value = _uiState.value.copy(searchLoading = true)
-                    delay(300)
-                    val results = runCatching { repo.search(q).map { it.toUi() } }.getOrElse { emptyList() }
-                    _uiState.value = _uiState.value.copy(searchResults = results, searchLoading = false)
-                }
-        }
+        fun onSearchQueryChange(q: String) { _uiState.value = _uiState.value.copy(searchQuery = q); if (q.isBlank()) { _uiState.value = _uiState.value.copy(searchResults = emptyList(), searchLoading = false) }; searchQueryFlow.value = q }
 
         fun onNewAchievement(a: Achievement) {
             val current = _uiState.value
@@ -118,7 +132,6 @@ class HomeViewModel
             } else {
                 baseList.add(0, a)
             }
-            //
             val sorted = baseList.sortedWith(compareByDescending<Achievement> { it.achievedAt }.thenByDescending { if (it.id == a.id) 1 else 0 })
             val grouped = buildAllListItems(sorted)
             val recents = current.achievements.toMutableList().let { list ->
