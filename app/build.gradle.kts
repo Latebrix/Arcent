@@ -31,7 +31,7 @@ android {
         applicationId = "tech.arcent"
         minSdk = 24
         targetSdk = 36
-        versionCode = 5
+        versionCode = 6
         versionName = "1.10 Beta"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
