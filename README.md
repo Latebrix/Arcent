@@ -5,6 +5,11 @@
   A beautiful Android app for tracking and celebrating your personal achievements, no matter how small.
 </p>
 
+<p align="center">
+  <a href="https://play.google.com/store/apps/details?id=tech.arcent">
+    <img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" height="80" />
+  </a>
+</p>
 <div align="center">
   <a href="https://github.com/Latebrix/arcent/blob/main/LICENSE">
     <img alt="License" src="https://img.shields.io/badge/license-MIT-green.svg">
