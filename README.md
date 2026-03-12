@@ -70,7 +70,7 @@ Whether it's completing a workout, learning something new, finishing a project, 
   <br />
   <br />
   <a href="https://www.browserstack.com/">
-    <img alt="BrowserStack" src="https://www.browserstack.com/images/layout/browserstack-logo-600x315.png" width="350" style="filter: brightness(0) invert(1);">
+    <img alt="BrowserStack" src="images/BrowserStack.png" width="350" style="filter: brightness(0) invert(1);">
   </a>
   <br />
   <br />
