@@ -66,14 +66,16 @@ Whether it's completing a workout, learning something new, finishing a project, 
 ## 🧪 Testing
 
 <p align="center">
-  <strong>This project is tested with BrowserStack.</strong>
+  <font size="5">This project is tested with <strong>BrowserStack</strong>.</font>
+  <br />
   <br />
   <a href="https://www.browserstack.com/">
-    <img src="https://www.browserstack.com/images/layout/browserstack-logo-600x315.png" alt="BrowserStack Logo" width="300" style="background-color: white; padding: 10px; border-radius: 5px;" />
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://www.browserstack.com/images/layout/browserstack-logo-600x315.png" style="filter: invert(1) brightness(2);">
+      <img alt="BrowserStack" src="https://www.browserstack.com/images/layout/browserstack-logo-600x315.png" width="350">
+    </picture>
   </a>
 </p>
-
----
 
 ---
 
