@@ -62,6 +62,19 @@ Whether it's completing a workout, learning something new, finishing a project, 
 - **Stay Motivated** - Use past achievements as inspiration
 - **Combat Negativity** - Focus on what's going right
 
+
+## 🧪 Testing
+
+<p align="center">
+  <strong>This project is tested with</strong>
+  <br />
+  <a href="https://www.browserstack.com/">
+    <img src="https://www.browserstack.com/images/layout/browserstack-logo-600x315.png" alt="BrowserStack Logo" width="300" />
+  </a>
+</p>
+
+---
+
 ## 🤝 Contributing
 
 Want to help make Arcent even better? Check out our [Contributing Guide](./CONTRIBUTING.md).
