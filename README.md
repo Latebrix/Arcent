@@ -66,7 +66,7 @@ Whether it's completing a workout, learning something new, finishing a project, 
 ## 🧪 Testing
 
 <p align="center">
-  <font size="5">This project is tested with <strong>BrowserStack</strong>.</font>
+  <font size="5">This project is tested with BrowserStack</font>
   <br />
   <br />
   <a href="https://www.browserstack.com/">
