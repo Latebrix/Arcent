@@ -63,19 +63,18 @@ Whether it's completing a workout, learning something new, finishing a project, 
 - **Combat Negativity** - Focus on what's going right
 
 
-## 🧪 Testing
+## 🧪 Testing and Sponsorship
 
 <p align="center">
   <font size="5">This project is tested with BrowserStack</font>
   <br />
   <br />
   <a href="https://www.browserstack.com/">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://www.browserstack.com/images/layout/browserstack-logo-600x315.png" style="filter: invert(1) brightness(2);">
-      <img alt="BrowserStack" src="https://www.browserstack.com/images/layout/browserstack-logo-600x315.png" width="350">
-    </picture>
+    <img alt="BrowserStack" src="https://www.browserstack.com/images/layout/browserstack-logo-600x315.png" width="350" style="filter: brightness(0) invert(1);">
   </a>
-</p>
+  <br />
+  <br />
+  <font size="4">This project is also sponsored by BrowserStack.</font> </p>
 
 ---
 
