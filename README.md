@@ -66,7 +66,7 @@ Whether it's completing a workout, learning something new, finishing a project, 
 ## 🧪 Testing and Sponsorship
 
 <p align="center">
-  <font size="5">This project is tested with BrowserStack. This project is also sponsored by BrowserStack</font>
+  <font size="5">This project is tested with BrowserStack. This project's testing is also sponsored by BrowserStack</font>
   <br />
   <br />
   <a href="https://www.browserstack.com/">
