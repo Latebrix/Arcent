@@ -24,9 +24,9 @@
 
 ## ✨ What is Arcent?
 
-Arcent helps you build positive momentum by documenting every victory in your life. Based on the psychological principle that celebrating small achievements builds self-confidence, the app encourages you to recognize every positive step on your journey.
+Arcent helps you build positive momentum by documenting every victory in your life. Celebrating small achievements builds self confidence, the app encourages you to recognize every positive step on your journey.
 
-Whether it's completing a workout, learning something new, finishing a project, or just having a good day - every win deserves celebration.
+Whether it's completing a workout, learning something new, finishing a project, or just having a good day - every win deserves celebration :)
 
 ## 📸 Screenshots
 
@@ -79,7 +79,7 @@ Whether it's completing a workout, learning something new, finishing a project, 
 
 ## 🤝 Contributing
 
-Want to help make Arcent even better? Check out our [Contributing Guide](./CONTRIBUTING.md).
+Want to help make Arcent even better? Check out [Contributing Guide](./CONTRIBUTING.md).
 
 ## 📄 License
 
